@@ -8,23 +8,43 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+const KEY_TMP = "__tmp" as const;
+const AUTH = "1234";
+
 export interface Env {
-	// Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-	// MY_KV_NAMESPACE: KVNamespace;
-	//
-	// Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-	// MY_DURABLE_OBJECT: DurableObjectNamespace;
-	//
-	// Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-	// MY_BUCKET: R2Bucket;
+  // Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
+  kinds: KVNamespace;
 }
 
+const outputJson = (output: any) =>
+  new Response(JSON.stringify(output), {
+    headers: {
+      "content-type": "application/json;charset=UTF-8",
+    },
+  });
+
 export default {
-	async fetch(
-		request: Request,
-		env: Env,
-		ctx: ExecutionContext
-	): Promise<Response> {
-		return new Response("Hello World!");
-	},
+  async fetch(
+    request: Request,
+    env: Env,
+    ctx: ExecutionContext
+  ): Promise<Response> {
+    const parsedUrl = new URL(request.url);
+    const { pathname } = parsedUrl;
+    if (pathname === "/" && request.method === "GET") {
+      return outputJson({ method: "get", kinds: [0, 1, 2] });
+    }
+
+    if (request.method === "PUT") {
+      const auth = request.headers.get("authentication");
+      if (auth !== AUTH) {
+        return new Response("", { status: 403 });
+      }
+      return outputJson({ method: request.method, auth });
+    }
+
+    await env.kinds.put(KEY_TMP, "success");
+    const list = await env.kinds.list();
+    return new Response(JSON.stringify(list));
+  },
 };
