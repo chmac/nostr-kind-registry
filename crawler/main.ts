@@ -1,4 +1,5 @@
-import { async, cliffy, nostr } from "./deps.ts";
+import { cliffy, nostr } from "./deps.ts";
+import { awaitForEachWithDelay } from "./src/async.ts";
 import { getRandomKinds } from "./src/getRandomKinds.ts";
 import { getRelays } from "./src/getRelays.ts";
 /**
@@ -17,16 +18,6 @@ import { getRelays } from "./src/getRelays.ts";
  * - [ ] Report any new findings
  * - [ ] Persist that report somewhere
  */
-
-const awaitForEach = async <T>(
-  input: T[],
-  iterator: (element: T) => Promise<void>
-) => {
-  await input.reduce(async (last, currentValue) => {
-    await last;
-    await iterator(currentValue);
-  }, Promise.resolve());
-};
 
 const logFactory = (verbose?: boolean) => (verbose ? console.log : () => {});
 
@@ -81,7 +72,7 @@ await new cliffy.Command()
     await client.connect();
     log("#Fa2TCY Connected to relay(s)");
 
-    await awaitForEach(
+    await awaitForEachWithDelay(
       Array.from({ length: options.relays.subscriptions }),
       async () => {
         const kinds = await getRandomKinds(
@@ -99,11 +90,8 @@ await new cliffy.Command()
         if (result.length > 0) {
           console.log("#6jdpMg Found an event!!!", result);
         }
-
-        log("#NuKbhv Waiting for delay seconds");
-        await async.delay(options.relays.delay * 1e3);
-        log("#NzoTHe Finished waiting");
-      }
+      },
+      options.relays.delay * 1e3
     );
 
     client.disconnect();
