@@ -1,14 +1,3 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `wrangler dev src/index.ts` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `wrangler publish src/index.ts --name my-worker` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
-
-const KEY_TMP = "__tmp" as const;
 const AUTH = "1234";
 
 export interface Env {
@@ -16,12 +5,16 @@ export interface Env {
   kinds: KVNamespace;
 }
 
-const outputJson = (output: any) =>
-  new Response(JSON.stringify(output), {
-    headers: {
-      "content-type": "application/json;charset=UTF-8",
-    },
-  });
+type KindPut = {
+  [kind: number | string]: {
+    seen: boolean;
+    firstSeenTimestamp?: number;
+    seenOnRelays?: string[];
+    relatedNips?: number[];
+    implementationUrls?: string[];
+  };
+};
+const forbidden = () => Response.json({ error: "Forbidden" }, { status: 403 });
 
 export default {
   async fetch(
@@ -31,20 +24,41 @@ export default {
   ): Promise<Response> {
     const parsedUrl = new URL(request.url);
     const { pathname } = parsedUrl;
-    if (pathname === "/" && request.method === "GET") {
-      return outputJson({ method: "get", kinds: [0, 1, 2] });
-    }
+    const kind = pathname.substring(1);
 
     if (request.method === "PUT") {
+      if (pathname === "/") {
+        return forbidden();
+      }
+
       const auth = request.headers.get("authentication");
       if (auth !== AUTH) {
-        return new Response("", { status: 403 });
+        return forbidden();
       }
-      return outputJson({ method: request.method, auth });
+
+      const kindData = (await request.json()) as KindPut;
+      // TODO - Check `kindData` against a schema
+
+      await env.kinds.put(kind.toString(), JSON.stringify(kindData));
+
+      return Response.json({ success: true });
     }
 
-    await env.kinds.put(KEY_TMP, "success");
-    const list = await env.kinds.list();
-    return new Response(JSON.stringify(list));
+    if (pathname === "/" && request.method === "GET") {
+      const list = await env.kinds.list();
+      const kinds = list.keys.map((key) => key.name);
+
+      return Response.json({ kinds });
+    }
+
+    if (request.method !== "GET") {
+      return forbidden();
+    }
+
+    const kindData = await env.kinds.get(kind);
+    if (kindData === null) {
+      return Response.json({ error: "Not found" }, { status: 404 });
+    }
+    return Response.json(kindData);
   },
 };
