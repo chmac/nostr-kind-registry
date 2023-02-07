@@ -105,5 +105,7 @@ await new cliffy.Command()
         log("#NzoTHe Finished waiting");
       }
     );
+
+    client.disconnect();
   })
   .parse();
