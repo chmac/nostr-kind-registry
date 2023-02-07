@@ -58,6 +58,11 @@ await new cliffy.Command()
       default: 100,
     }
   )
+  .option(
+    "-k.m --kinds.maximum <maximum:integer>",
+    "The highest kind to check",
+    { default: 40e3 }
+  )
   .option("-v, --verbose", "Log every step in the process")
   .action(async (options) => {
     const log = logFactory(options.verbose);
@@ -79,7 +84,10 @@ await new cliffy.Command()
     await awaitForEach(
       Array.from({ length: options.relays.subscriptions }),
       async () => {
-        const kinds = await getRandomKinds(options.kinds.perSubscription);
+        const kinds = await getRandomKinds(
+          options.kinds.perSubscription,
+          options.kinds.maximum
+        );
         log("#lMer4G Subscribing for kinds", kinds);
         const result = await client
           .filter({
