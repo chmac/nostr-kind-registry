@@ -2,7 +2,7 @@ import { WORKER_URL } from "../shared/constants.ts";
 import { cliffy } from "./deps.ts";
 import { crawl } from "./src/crawl.ts";
 
-await new cliffy.Command()
+const command = new cliffy.Command()
   .name("crawl")
   .description("Crawl nostr relays searching for new kinds")
   .version("0.1.0")
@@ -45,7 +45,7 @@ await new cliffy.Command()
     "Add a relay to the list of stored relays"
   )
   .action(async (options, relayUrl) => {
-    await fetch(WORKER_URL, {
+    const result = await fetch(WORKER_URL, {
       body: JSON.stringify({ url: relayUrl }),
       method: "PUT",
       headers: {
@@ -54,5 +54,19 @@ await new cliffy.Command()
         Authorization: options.authKey,
       },
     });
-  })
-  .parse();
+
+    if (result.status !== 201) {
+      const message = "#B3WYru Error saving relay";
+      console.error(message, result.status);
+      console.error(await result.text());
+      throw new Error(message);
+    }
+  });
+
+try {
+  await command.parse();
+} catch (error) {
+  console.error("#UVxW6D Exiting with error now");
+  console.error(error);
+  Deno.exit(1);
+}
