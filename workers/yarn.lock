@@ -782,6 +782,11 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
+hono@^2.7.6:
+  version "2.7.6"
+  resolved "https://registry.yarnpkg.com/hono/-/hono-2.7.6.tgz#9c06f3081bef52c3045869139b09112329163fdb"
+  integrity sha512-gXHJOaodyMsWkkbc1LYs+qcPb9GFl3Gkw8tTpQASYmieP1/sFCZf7DILZx8N1Vx/tqUtHtWHPaJxQMWK4nEowg==
+
 html-rewriter-wasm@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/html-rewriter-wasm/-/html-rewriter-wasm-0.4.1.tgz#235e3d96c1aa4bfd2182661ee13881e290ff5ff2"
@@ -842,16 +847,6 @@ isexe@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
-
-itty-cors@^0.3.5:
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/itty-cors/-/itty-cors-0.3.5.tgz#2b10b9e032e5ff66772a0f73b20ac0fed9d5d87f"
-  integrity sha512-EG7AUAXWg1rvgGef4QDp/OZfR9uV+2naD1iSkBmgR8eRYfm9CnTdbh69xvroWDIfNG/dw5rjhAH1rglKMJC3og==
-
-itty-router@^3.0.11:
-  version "3.0.11"
-  resolved "https://registry.yarnpkg.com/itty-router/-/itty-router-3.0.11.tgz#256c2ef0a12721a839656f49db640d40ed2fb308"
-  integrity sha512-vWsoHBi2CmU15YzyUeHjRfjdySL2jqZQKA9jP1LXkBcLJAo0KQNVlQMvhtzG0mzABhVYifeBF97UkrrpuTCWYQ==
 
 jsonc-parser@^3.2.0:
   version "3.2.0"

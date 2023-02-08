@@ -14,8 +14,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "itty-cors": "^0.3.5",
-    "itty-router": "^3.0.11",
+    "hono": "^2.7.6",
     "zod": "^3.20.3"
   }
 }

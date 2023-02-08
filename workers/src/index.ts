@@ -1,5 +1,5 @@
-import { createCors } from "itty-cors";
-import { IRequest, Router } from "itty-router";
+import { MiddlewareHandler, Hono } from "hono";
+import { cors } from "hono/cors";
 import {
   KindMeta,
   WORKER_OUTPUT_KIND_SINGLE,
@@ -17,12 +17,12 @@ export interface Env {
 
 const forbidden = () => Response.json({ error: "Forbidden" }, { status: 403 });
 
-const checkAuth = (request: IRequest, env: Env) => {
-  const auth = (request as any).headers.get("authorization");
-  if (auth !== env.AUTH_KEY) {
-    console.log("#l9u3Uw env.AUTH_KEY", env.AUTH_KEY);
+const checkAuth: MiddlewareHandler = async (c, next) => {
+  const auth = c.req.headers.get("authorization");
+  if (auth !== c.env.AUTH_KEY) {
     return forbidden();
   }
+  await next();
 };
 
 const randomItem = <T>(input: T[]): T =>
@@ -31,60 +31,53 @@ const randomItem = <T>(input: T[]): T =>
 const randomItems = <T>(input: T[], count: number): T[] =>
   Array.from({ length: count }).map(() => randomItem(input));
 
-const router = Router();
+const app = new Hono<{ Bindings: Env }>();
+app.use("*", cors());
 
-const { preflight } = createCors({ origins: ["*"] });
-
-// NOTE: There's a typing error between `preflight` and itty-router v3, so I'm
-// casting to `any` here to suppress the error.
-router.all("*", preflight as any);
-
-router.get(
+app.get(
   "/relays/random",
-  async (request, env: Env, context: ExecutionContext) => {
+  // async (request, env: Env, context: ExecutionContext) => {
+  async (context) => {
+    const { env } = context;
+    const { countParamString } = context.req.query();
+    const countParam = parseInt(countParamString);
     const listItems = await env.relays.list();
-    const countParam =
-      typeof request.query.count !== "string"
-        ? 1
-        : parseInt(request.query.count);
     const count = Math.min(countParam, listItems.keys.length);
     const keys = randomItems(listItems.keys, count);
     const relays = (await Promise.all(
       keys.map((listItem) => env.relays.get(listItem.name, { type: "json" }))
     )) as WORKER_OUTPUT_RELAYS;
-    return Response.json(relays);
+    return context.json(relays);
   }
 );
 
-router.post(
-  "/relays",
-  checkAuth,
-  async (request, env: Env, context: ExecutionContext) => {
-    const maybeRelay = await request.json();
+app.post("/relays", checkAuth, async (context) => {
+  const { env } = context;
+  const maybeRelay = await context.req.json();
 
-    const parseResult = RelaySchema.safeParse(maybeRelay);
-    if (!parseResult.success) {
-      return Response.json(
-        { error: "invalid", code: "#jlbfq4" },
-        { status: 400 }
-      );
-    }
-
-    const relay = parseResult.data;
-    const { url } = relay;
-    const existingRelay = await env.relays.get(url);
-
-    if (existingRelay !== null) {
-      return Response.json({ error: "exists" }, { status: 400 });
-    }
-
-    await env.relays.put(url, JSON.stringify(relay));
-
-    return Response.json({ success: true }, { status: 201 });
+  const parseResult = RelaySchema.safeParse(maybeRelay);
+  if (!parseResult.success) {
+    return Response.json(
+      { error: "invalid", code: "#jlbfq4" },
+      { status: 400 }
+    );
   }
-);
 
-router.get("/relays", async (request, env: Env, context: ExecutionContext) => {
+  const relay = parseResult.data;
+  const { url } = relay;
+  const existingRelay = await env.relays.get(url);
+
+  if (existingRelay !== null) {
+    return Response.json({ error: "exists" }, { status: 400 });
+  }
+
+  await env.relays.put(url, JSON.stringify(relay));
+
+  return Response.json({ success: true }, { status: 201 });
+});
+
+app.get("/relays", async (context) => {
+  const { env } = context;
   const listItems = await env.relays.list();
   const relays = (await Promise.all(
     listItems.keys.map((listItem) =>
@@ -94,39 +87,37 @@ router.get("/relays", async (request, env: Env, context: ExecutionContext) => {
   return Response.json(relays);
 });
 
-router.post(
-  "/kinds",
-  checkAuth,
-  async (request, env: Env, context: ExecutionContext) => {
-    const maybeKindData = await request.json();
+app.post("/kinds", checkAuth, async (context) => {
+  const { env } = context;
+  const maybeKindData = await context.req.json();
 
-    const parseResult = KindMetaSchema.safeParse(maybeKindData);
+  const parseResult = KindMetaSchema.safeParse(maybeKindData);
 
-    if (!parseResult.success) {
-      return Response.json(
-        { error: "invalid", code: "#4fhAeE" },
-        { status: 400 }
-      );
-    }
-
-    const kindData = parseResult.data;
-    const { kind } = kindData;
-
-    const existingKind = (await env.kinds.get(kind.toString(), {
-      type: "json",
-    })) as KindMeta | null;
-
-    if (existingKind !== null) {
-      return Response.json({ error: "exists" }, { status: 400 });
-    }
-
-    await env.kinds.put(kind.toString(), JSON.stringify(kindData));
-
-    return Response.json({ success: true }, { status: 201 });
+  if (!parseResult.success) {
+    return Response.json(
+      { error: "invalid", code: "#4fhAeE" },
+      { status: 400 }
+    );
   }
-);
 
-router.get("/kinds", async (request, env: Env, context: ExecutionContext) => {
+  const kindData = parseResult.data;
+  const { kind } = kindData;
+
+  const existingKind = (await env.kinds.get(kind.toString(), {
+    type: "json",
+  })) as KindMeta | null;
+
+  if (existingKind !== null) {
+    return Response.json({ error: "exists" }, { status: 400 });
+  }
+
+  await env.kinds.put(kind.toString(), JSON.stringify(kindData));
+
+  return Response.json({ success: true }, { status: 201 });
+});
+
+app.get("/kinds", async (context) => {
+  const { env } = context;
   const list = await env.kinds.list();
   const kinds = list.keys.map((key) => parseInt(key.name));
   const output: WORKER_OUTPUT_SEEN_KINDS = { kinds };
@@ -134,28 +125,22 @@ router.get("/kinds", async (request, env: Env, context: ExecutionContext) => {
   return Response.json(output);
 });
 
-router.get(
-  "/kinds/:kind",
-  async (request, env: Env, context: ExecutionContext) => {
-    const kind = request.params.kind;
-    const kindData = (await env.kinds.get(kind, { type: "json" })) as KindMeta;
-    if (kindData === null) {
-      return Response.json({ error: "not found" }, { status: 404 });
-    }
-    const output: WORKER_OUTPUT_KIND_SINGLE = { kind: kindData };
+app.get("/kinds/:kind", async (context) => {
+  const { env } = context;
 
-    return Response.json(output);
+  const kind = context.req.param("kind");
+  const kindData = (await env.kinds.get(kind, { type: "json" })) as KindMeta;
+  if (kindData === null) {
+    return Response.json({ error: "not found" }, { status: 404 });
   }
-);
+  const output: WORKER_OUTPUT_KIND_SINGLE = { kind: kindData };
 
-router.all("*", () => Response.json({ error: "not found" }, { status: 404 }));
+  return Response.json(output);
+});
 
-export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    context: ExecutionContext
-  ): Promise<Response> {
-    return router.handle(request, env, context);
-  },
-};
+// app.all("*", () => Response.json({ error: "not found" }, { status: 404 }));
+app.notFound(async (context) => {
+  return context.json({ error: "not found" }, 404);
+});
+
+export default app;
