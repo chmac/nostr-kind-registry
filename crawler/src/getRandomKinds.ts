@@ -1,5 +1,5 @@
 import { WORKER_OUTPUT_SEEN_KINDS } from "../../shared/types.ts";
-import { WORKER_URL } from "../constants.ts";
+import { WORKER_URL } from "../../shared/constants.ts";
 
 const MAX = 40e3;
 
