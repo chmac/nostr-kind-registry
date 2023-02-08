@@ -93,6 +93,7 @@ export default {
       const kinds = list.keys.map((key) => parseInt(key.name));
       const output: WORKER_OUTPUT_SEEN_KINDS = { kinds };
 
+      console.log("output", output);
       return Response.json(output);
     }
 
