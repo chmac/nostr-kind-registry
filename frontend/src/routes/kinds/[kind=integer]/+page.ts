@@ -1,21 +1,11 @@
-import { WORKER_URL } from '../../../../../shared/constants.ts';
+import { WORKER_URL } from '../../../../../shared/constants';
 
 export const load = async ({ params }: { params: { kind: string } }) => {
-	// const res = await fetch(WORKER_URL + params.kind);
-	// const json = await res.json();
-	// const kind = json.kind;
-
-	// USE THIS UNTIL ABOVE WORKERS
-	const tmpKind = {
-		kind: 4,
-		seen: true,
-		firstSeenTimestamp: 1675851518,
-		seenOnRelays: ['wss://knostr.neutrine.com'],
-		relatedNips: [4],
-		implementationUrls: ['https://github.com/SebastiaanWouters/emon']
-	};
+	const res = await fetch(`${WORKER_URL}/kinds/${params.kind}`);
+	const json = await res.json();
+	const kind = json.kind;
 
 	return {
-		kind: tmpKind
+		kind
 	};
 };

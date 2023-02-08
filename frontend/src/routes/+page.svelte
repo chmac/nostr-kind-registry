@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { KindMeta } from '../../../shared/types';
-	export let data: { kinds: number[] };
+	import type { WORKER_OUTPUT_SEEN_KINDS } from '../../../shared/types';
+
+	export let data: WORKER_OUTPUT_SEEN_KINDS;
 </script>
 
 <h1>All Kinds Ever seen</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 
 <ul>
 	{#each data.kinds as kind}
