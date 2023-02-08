@@ -1,3 +1,7 @@
+import {
+  WORKER_OUTPUT_RELAYS,
+  WORKER_OUTPUT_SEEN_KINDS,
+} from "../../shared/types";
 const AUTH = "1234";
 
 export interface Env {
@@ -51,9 +55,9 @@ export default {
         keys.push(...listItems.keys);
       }
 
-      const relays = await Promise.all(
+      const relays = (await Promise.all(
         keys.map((listItem) => env.relays.get(listItem.name, { type: "json" }))
-      );
+      )) as WORKER_OUTPUT_RELAYS;
       return Response.json(relays);
     }
 
@@ -86,7 +90,8 @@ export default {
 
     if (pathname === "/" && request.method === "GET") {
       const list = await env.kinds.list();
-      const kinds = list.keys.map((key) => key.name);
+      const kinds = list.keys.map((key) => parseInt(key.name));
+      const output: WORKER_OUTPUT_SEEN_KINDS = { kinds };
 
       return Response.json({ kinds });
     }
@@ -95,6 +100,7 @@ export default {
       return forbidden();
     }
 
+    // TODO - Add output typing here
     const kindData = await env.kinds.get(kind);
     if (kindData === null) {
       return Response.json({ error: "Not found" }, { status: 404 });

@@ -1,11 +1,11 @@
+import { WORKER_OUTPUT_SEEN_KINDS } from "../../shared/types.ts";
 import { WORKER_URL } from "../constants.ts";
 
 const MAX = 40e3;
 
 const getSeenKinds = async () => {
   const result = await fetch(`${WORKER_URL}`);
-  const { kinds } = (await result.json()) as { kinds: number[] };
-  console.log("#No2hCK getSeenKinds()", result, kinds);
+  const { kinds } = (await result.json()) as WORKER_OUTPUT_SEEN_KINDS;
   return kinds;
 };
 
