@@ -3,6 +3,7 @@ const AUTH = "1234";
 export interface Env {
   // Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
   kinds: KVNamespace;
+  relays: KVNamespace;
 }
 
 type KindPut = {
@@ -25,6 +26,19 @@ export default {
     const parsedUrl = new URL(request.url);
     const { pathname } = parsedUrl;
     const kind = pathname.substring(1);
+
+    if (pathname.startsWith("/relays")) {
+      if (request.method !== "GET") {
+        return forbidden();
+      }
+      const relayLists = await env.relays.list();
+      const relays = <string[]>[];
+      for (const relayList of relayLists.keys) {
+        const relay = await env.relays.get(relayList.name);
+        relays.push(relay!);
+      }
+      return Response.json(relays);
+    }
 
     if (request.method === "PUT") {
       if (pathname === "/") {
