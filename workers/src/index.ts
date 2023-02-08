@@ -15,7 +15,14 @@ type KindPut = {
     implementationUrls?: string[];
   };
 };
+
 const forbidden = () => Response.json({ error: "Forbidden" }, { status: 403 });
+
+const randomItem = <T>(input: T[]): T =>
+  input[Math.floor(Math.random() * input.length)];
+
+const randomItems = <T>(input: T[], count: number): T[] =>
+  Array.from({ length: count }).map(() => randomItem(input));
 
 export default {
   async fetch(
@@ -31,12 +38,22 @@ export default {
       if (request.method !== "GET") {
         return forbidden();
       }
-      const relayLists = await env.relays.list();
-      const relays = <string[]>[];
-      for (const relayList of relayLists.keys) {
-        const relay = await env.relays.get(relayList.name);
-        relays.push(relay!);
+      const listItems = await env.relays.list();
+      const keys = [];
+
+      if (pathname.startsWith("/relays/random")) {
+        // const count = parsedUrl.searchParams
+        const countParam = parseInt(parsedUrl.searchParams.get("count") || "1");
+        const count = Math.min(countParam, listItems.keys.length);
+        // NOTE: Unclear why this must be cast to string[] here...
+        keys.push(...randomItems(listItems.keys, count));
+      } else {
+        keys.push(...listItems.keys);
       }
+
+      const relays = await Promise.all(
+        keys.map((listItem) => env.relays.get(listItem.name, { type: "json" }))
+      );
       return Response.json(relays);
     }
 
