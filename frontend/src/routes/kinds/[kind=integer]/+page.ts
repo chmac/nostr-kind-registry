@@ -1,10 +1,11 @@
 import { WORKER_URL } from '../../../../../shared/constants.ts';
 
 export const load = async ({ params }: { params: { kind: string } }) => {
-	const res = await fetch(WORKER_URL + params.kind);
-	const json = await res.json();
-	const kind = json.kind;
+	// const res = await fetch(WORKER_URL + params.kind);
+	// const json = await res.json();
+	// const kind = json.kind;
 
+	// USE THIS UNTIL ABOVE WORKERS
 	const tmpKind = {
 		kind: 4,
 		seen: true,
