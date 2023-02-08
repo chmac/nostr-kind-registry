@@ -24,10 +24,12 @@ const crawlRelay = async ({
   client,
   options,
   log,
+  relayUrl,
 }: {
   client: nostr.Nostr;
   options: Options;
   log: ReturnType<typeof logFactory>;
+  relayUrl: string;
 }) => {
   await awaitForEachWithDelay(
     Array.from({ length: options.relays.subscriptions }),
@@ -48,7 +50,7 @@ const crawlRelay = async ({
 
       if (events.length > 0) {
         const event = events[0] as NostrEvent;
-        saveFoundKind({ event, relayUrl: "" });
+        saveFoundKind({ event, relayUrl });
       }
     },
     options.relays.delay * 1e3
@@ -63,23 +65,28 @@ export const crawl = async (options: Options) => {
 
   await Promise.allSettled(
     relayUrls.map(async (relayUrl) => {
-      const client = new nostr.Nostr();
-      client.privateKey = "";
-      client.relayList.push({ name: relayUrl, url: relayUrl } as never);
-
-      log("#LHc6qS Connecting to relay", relayUrl);
       try {
-        await client.connect();
+        console.log("#GmECia Connecting to relay", relayUrl);
+        const client = new nostr.Nostr();
+        client.relayList.push({ name: relayUrl, url: relayUrl } as never);
+
+        log("#LHc6qS Connecting to relay", relayUrl);
+        try {
+          await client.connect();
+        } catch (error) {
+          console.error("#x5P3fz Error trying to connect to relay");
+          console.error(relayUrl);
+          console.error(error);
+          return;
+        }
+
+        await crawlRelay({ client, options, log, relayUrl });
+
+        client.disconnect();
       } catch (error) {
-        console.error("#x5P3fz Error trying to connect to relay");
-        console.error(relayUrl);
+        console.error("#vqGTj6 Error on relay", relayUrl);
         console.error(error);
-        return;
       }
-
-      crawlRelay({ client, options, log });
-
-      client.disconnect();
     })
   );
 };
