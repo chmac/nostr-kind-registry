@@ -1,1 +1,1 @@
-export const WORKER_URL = "https://workers.nostrkr.workers.dev";
+export const WORKER_URL = "https://nkr.nostrkr.workers.dev";
