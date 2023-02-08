@@ -81,35 +81,47 @@ await new cliffy.Command()
           options.kinds.perSubscription,
           options.kinds.maximum
         );
-        log("#lMer4G Subscribing for kinds", kinds);
-        const results = await client
+        log("#lMer4G Subscribing for kinds", kinds.join(", "));
+        const events = await client
           .filter({
             kinds,
             limit: 1,
           })
           .collect();
 
-        if (results.length > 0) {
-          const event = results[0] as NostrEvent;
+        if (events.length > 0) {
+          const event = events[0] as NostrEvent;
           const { kind } = event;
           const foundNewKind: KindMeta = {
             kind,
             seen: true,
             firstSeenTimestamp: Math.floor(Date.now() / 1e3),
           };
+          console.log("#p1tYsu Found a new kind! 🚀🚀🚀");
+          console.log(foundNewKind);
+          console.log(event);
           try {
-            await fetch(`${WORKER_URL}/${kind}`, {
+            const putResult = await fetch(`${WORKER_URL}/${kind}`, {
+              method: "put",
               body: JSON.stringify(foundNewKind),
               headers: {
                 Accept: "application/json",
                 "Content-Type": "application/json",
+                Authorization: "1234",
               },
             });
+            const putResultBody = await putResult.json();
+            if (putResult.status !== 201 || putResultBody.success !== true) {
+              const message = "#Uedt1e Failed to save found kind";
+              console.error(message);
+              console.error(putResultBody);
+              console.error(putResult);
+              throw new Error(message);
+            }
           } catch (error) {
             console.error("#HDufs6 Failed to PUT new kind", error);
             return;
           }
-          console.log("#9s6XYY Found and saved new kind!!!", event);
         }
       },
       options.relays.delay * 1e3

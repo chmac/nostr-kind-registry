@@ -75,7 +75,7 @@ export default {
         );
       }
 
-      const auth = request.headers.get("authentication");
+      const auth = request.headers.get("authorization");
       if (auth !== AUTH) {
         return forbidden();
       }
@@ -85,7 +85,7 @@ export default {
 
       await env.kinds.put(kind.toString(), JSON.stringify(kindData));
 
-      return Response.json({ success: true });
+      return Response.json({ success: true }, { status: 201 });
     }
 
     if (pathname === "/" && request.method === "GET") {
@@ -93,7 +93,7 @@ export default {
       const kinds = list.keys.map((key) => parseInt(key.name));
       const output: WORKER_OUTPUT_SEEN_KINDS = { kinds };
 
-      return Response.json({ kinds });
+      return Response.json(output);
     }
 
     if (request.method !== "GET") {
