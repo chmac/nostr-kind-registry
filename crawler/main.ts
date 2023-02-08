@@ -5,6 +5,9 @@ await new cliffy.Command()
   .name("crawl")
   .description("Crawl nostr relays searching for new kinds")
   .version("0.1.0")
+  .globalEnv("AUTH_KEY=<authKey:string>", "Set the authentication key", {
+    required: true,
+  })
   .option(
     "-r.c, --relays.count <relayCount:integer>",
     "How many relays to crawl",

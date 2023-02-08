@@ -2,7 +2,15 @@ export type WORKER_OUTPUT_SEEN_KINDS = {
   kinds: number[];
 };
 
-export type WORKER_OUTPUT_RELAYS = { url: string }[];
+export type WORKER_OUTPUT_KIND_SINGLE = {
+  kind: KindMeta;
+};
+
+export type WORKER_OUTPUT_RELAY_SINGLE = {
+  url: string;
+};
+
+export type WORKER_OUTPUT_RELAYS = WORKER_OUTPUT_RELAY_SINGLE[];
 
 export type KindMeta = {
   kind: number;

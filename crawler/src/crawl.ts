@@ -18,6 +18,7 @@ type Options = {
     maximum: number;
   };
   verbose?: boolean | undefined;
+  authKey: string;
 };
 
 const crawlRelay = async ({
@@ -50,7 +51,7 @@ const crawlRelay = async ({
 
       if (events.length > 0) {
         const event = events[0] as NostrEvent;
-        saveFoundKind({ event, relayUrl });
+        saveFoundKind({ event, relayUrl, authKey: options.authKey });
       }
     },
     options.relays.delay * 1e3

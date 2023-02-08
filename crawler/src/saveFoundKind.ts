@@ -4,9 +4,11 @@ import { KindMeta, NostrEvent } from "../../shared/types.ts";
 export const saveFoundKind = async ({
   event,
   relayUrl,
+  authKey,
 }: {
   event: NostrEvent;
   relayUrl: string;
+  authKey: string;
 }) => {
   const { kind } = event;
   const foundNewKind: KindMeta = {
@@ -25,7 +27,7 @@ export const saveFoundKind = async ({
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: "1234",
+        Authorization: authKey,
       },
     });
     const putResultBody = await putResult.json();
