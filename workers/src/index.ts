@@ -1,3 +1,4 @@
+import { createCors } from "itty-cors";
 import { IRequest, Router } from "itty-router";
 import {
   KindMeta,
@@ -31,6 +32,12 @@ const randomItems = <T>(input: T[], count: number): T[] =>
   Array.from({ length: count }).map(() => randomItem(input));
 
 const router = Router();
+
+const { preflight } = createCors({ origins: ["*"] });
+
+// NOTE: There's a typing error between `preflight` and itty-router v3, so I'm
+// casting to `any` here to suppress the error.
+router.all("*", preflight as any);
 
 router.get(
   "/relays/random",
