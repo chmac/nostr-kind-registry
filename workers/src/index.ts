@@ -31,6 +31,15 @@ export default {
         return forbidden();
       }
 
+      const kindInt = parseInt(kind);
+      // TODO - The kind to path mapping could be better verified here
+      if (!Number.isInteger(kindInt) || kindInt.toString() !== kind) {
+        return Response.json(
+          { error: "Invalid", code: "#0LA0q2" },
+          { status: 400 }
+        );
+      }
+
       const auth = request.headers.get("authentication");
       if (auth !== AUTH) {
         return forbidden();
