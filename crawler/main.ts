@@ -1,3 +1,5 @@
+import { KindMeta, NostrEvent } from "../shared/types.ts";
+import { WORKER_URL } from "./constants.ts";
 import { cliffy, nostr } from "./deps.ts";
 import { awaitForEachWithDelay } from "./src/async.ts";
 import { getRandomKinds } from "./src/getRandomKinds.ts";
@@ -80,15 +82,34 @@ await new cliffy.Command()
           options.kinds.maximum
         );
         log("#lMer4G Subscribing for kinds", kinds);
-        const result = await client
+        const results = await client
           .filter({
             kinds,
             limit: 1,
           })
           .collect();
 
-        if (result.length > 0) {
-          console.log("#6jdpMg Found an event!!!", result);
+        if (results.length > 0) {
+          const event = results[0] as NostrEvent;
+          const { kind } = event;
+          const foundNewKind: KindMeta = {
+            kind,
+            seen: true,
+            firstSeenTimestamp: Math.floor(Date.now() / 1e3),
+          };
+          try {
+            await fetch(`${WORKER_URL}/${kind}`, {
+              body: JSON.stringify(foundNewKind),
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+            });
+          } catch (error) {
+            console.error("#HDufs6 Failed to PUT new kind", error);
+            return;
+          }
+          console.log("#9s6XYY Found and saved new kind!!!", event);
         }
       },
       options.relays.delay * 1e3
