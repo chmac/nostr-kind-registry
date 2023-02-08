@@ -63,16 +63,64 @@ await new cliffy.Command()
     const relayUrls = await getRelays(options.relays.count);
     log("#d0T3uX Got relayUrls", relayUrls);
 
-    const client = new nostr.Nostr();
-    client.privateKey = "";
+    const clients: nostr.Nostr[] = [];
 
-    relayUrls.forEach((relayUrl) => {
-      client.relayList.push({ name: relayUrl, url: relayUrl } as never);
-    });
+    await Promise.all(
+      relayUrls.map(async (relayUrl) => {
+        log("setting up client for " + relayUrl);
+        const client = new nostr.Nostr();
+        client.privateKey = "";
+        client.relayList.push({ name: relayUrl, url: relayUrl } as never);
+        clients.push(client);
+        await client.connect();
+        log("client connected to " + relayUrl);
+      })
+    );
 
-    log("#vYzqmj Connecting to relay(s)");
-    await client.connect();
-    log("#Fa2TCY Connected to relay(s)");
+    async function subscribeClient(client: nostr.Nostr, kinds: number[]) {
+      const events = await client
+        .filter({
+          kinds,
+          limit: 1,
+        })
+        .collect();
+      if (events.length > 0) {
+        const event = events[0] as NostrEvent;
+        const { kind } = event;
+        const foundNewKind: KindMeta = {
+          kind,
+          seen: true,
+          firstSeenTimestamp: Math.floor(Date.now() / 1e3),
+          seenOnRelays: [(client.relayList[0] as { url: string }).url],
+        };
+        console.log("#p1tYsu Found a new kind! 🚀🚀🚀");
+        console.log(foundNewKind);
+        console.log(event);
+        try {
+          const putResult = await fetch(`${WORKER_URL}/${kind}`, {
+            method: "put",
+            body: JSON.stringify(foundNewKind),
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              Authorization: "1234",
+            },
+          });
+          const putResultBody = await putResult.json();
+          if (putResult.status !== 201 || putResultBody.success !== true) {
+            const message = "#Uedt1e Failed to save found kind";
+            console.error(message);
+            console.error(putResultBody);
+            console.error(putResult);
+            throw new Error(message);
+          }
+        } catch (error) {
+          console.error("#HDufs6 Failed to PUT new kind", error);
+          return;
+        }
+      }
+      client.disconnect();
+    }
 
     await awaitForEachWithDelay(
       Array.from({ length: options.relays.subscriptions }),
@@ -82,51 +130,11 @@ await new cliffy.Command()
           options.kinds.maximum
         );
         log("#lMer4G Subscribing for kinds", kinds.join(", "));
-        const events = await client
-          .filter({
-            kinds,
-            limit: 1,
-          })
-          .collect();
-
-        if (events.length > 0) {
-          const event = events[0] as NostrEvent;
-          const { kind } = event;
-          const foundNewKind: KindMeta = {
-            kind,
-            seen: true,
-            firstSeenTimestamp: Math.floor(Date.now() / 1e3),
-          };
-          console.log("#p1tYsu Found a new kind! 🚀🚀🚀");
-          console.log(foundNewKind);
-          console.log(event);
-          try {
-            const putResult = await fetch(`${WORKER_URL}/${kind}`, {
-              method: "put",
-              body: JSON.stringify(foundNewKind),
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: "1234",
-              },
-            });
-            const putResultBody = await putResult.json();
-            if (putResult.status !== 201 || putResultBody.success !== true) {
-              const message = "#Uedt1e Failed to save found kind";
-              console.error(message);
-              console.error(putResultBody);
-              console.error(putResult);
-              throw new Error(message);
-            }
-          } catch (error) {
-            console.error("#HDufs6 Failed to PUT new kind", error);
-            return;
-          }
-        }
+        await Promise.all(
+          clients.map(async (client) => await subscribeClient(client, kinds))
+        );
       },
       options.relays.delay * 1e3
     );
-
-    client.disconnect();
   })
   .parse();

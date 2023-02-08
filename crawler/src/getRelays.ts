@@ -6,6 +6,8 @@ export const getRelays = async (count: number) => {
     `${WORKER_URL}/relays/random?count=${count.toString()}`
   );
   const relays = (await result.json()) as WORKER_OUTPUT_RELAYS;
+  if (relays.length == 0 || result.status !== 200)
+    throw new Error("could not get relays");
   const relayUrls = relays.map((relay) => relay.url);
   return relayUrls;
 };
