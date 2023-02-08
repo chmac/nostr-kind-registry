@@ -1,7 +1,6 @@
 <script lang="ts">
-	import type { WORKER_OUTPUT_KIND_SINGLE } from '../../../../../shared/types';
-
-	export let data: WORKER_OUTPUT_KIND_SINGLE;
+	import type { PageData } from "./$types";
+	export let data: PageData
 </script>
 
 <h1>

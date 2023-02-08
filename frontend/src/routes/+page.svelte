@@ -1,7 +1,6 @@
 <script lang="ts">
-	import type { WORKER_OUTPUT_SEEN_KINDS } from '../../../shared/types';
-
-	export let data: WORKER_OUTPUT_SEEN_KINDS;
+	import type { PageData } from "./$types";
+	export let data: PageData
 </script>
 
 <h1>All Kinds Ever seen</h1>
