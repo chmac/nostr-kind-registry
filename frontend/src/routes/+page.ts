@@ -1,4 +1,4 @@
-import { WORKER_URL } from '../../../shared/constants.ts';
+import { WORKER_URL } from '../../../shared/constants';
 export const load = async () => {
 	const response = await fetch(WORKER_URL);
 	const json = await response.json();
