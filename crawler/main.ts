@@ -1,3 +1,4 @@
+import { WORKER_URL } from "../shared/constants.ts";
 import { cliffy } from "./deps.ts";
 import { crawl } from "./src/crawl.ts";
 
@@ -39,4 +40,19 @@ await new cliffy.Command()
   )
   .option("-v, --verbose", "Log every step in the process")
   .action(crawl)
+  .command(
+    "add-relay <relayUrl:string>",
+    "Add a relay to the list of stored relays"
+  )
+  .action(async (options, relayUrl) => {
+    await fetch(WORKER_URL, {
+      body: JSON.stringify({ url: relayUrl }),
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: options.authKey,
+      },
+    });
+  })
   .parse();
