@@ -6,3 +6,9 @@ kv_namespaces = [
   { binding = "kinds", id = "53c969db21a24e9b8e1bb0e0d1e11ef5", preview_id = "53c969db21a24e9b8e1bb0e0d1e11ef5" },
   { binding = "relays", id = "75c74a36325043cfbd7ecac49aa8ccd1", preview_id = "75c74a36325043cfbd7ecac49aa8ccd1" },
 ]
+
+[vars]
+
+# The necessary secrets are:
+# - AUTH_KEY
+# Run `echo <VALUE> | wrangler secret put <NAME>` for each of these
