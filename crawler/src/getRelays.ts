@@ -1,5 +1,5 @@
 import { WORKER_OUTPUT_RELAYS } from "../../shared/types.ts";
-import { WORKER_URL } from "../constants.ts";
+import { WORKER_URL } from "../../shared/constants.ts";
 
 export const getRelays = async (count: number) => {
   const result = await fetch(

@@ -1,5 +1,5 @@
 import { KindMeta, NostrEvent } from "../shared/types.ts";
-import { WORKER_URL } from "./constants.ts";
+import { WORKER_URL } from "../shared/constants.ts";
 import { cliffy, nostr } from "./deps.ts";
 import { awaitForEachWithDelay } from "./src/async.ts";
 import { getRandomKinds } from "./src/getRandomKinds.ts";
