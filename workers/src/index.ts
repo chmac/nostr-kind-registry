@@ -3,9 +3,9 @@ import {
   KindMeta,
   WORKER_OUTPUT_KIND_SINGLE,
   WORKER_OUTPUT_RELAYS,
-  WORKER_OUTPUT_RELAY_SINGLE,
   WORKER_OUTPUT_SEEN_KINDS,
 } from "../../shared/types";
+import { KindMetaSchema, RelaySchema } from "./schemas";
 
 export interface Env {
   // Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
@@ -14,21 +14,12 @@ export interface Env {
   AUTH_KEY: string;
 }
 
-type KindPut = {
-  [kind: number | string]: {
-    seen: boolean;
-    firstSeenTimestamp?: number;
-    seenOnRelays?: string[];
-    relatedNips?: number[];
-    implementationUrls?: string[];
-  };
-};
-
 const forbidden = () => Response.json({ error: "Forbidden" }, { status: 403 });
 
 const checkAuth = (request: IRequest, env: Env) => {
   const auth = (request as any).headers.get("authorization");
   if (auth !== env.AUTH_KEY) {
+    console.log("#l9u3Uw env.AUTH_KEY", env.AUTH_KEY);
     return forbidden();
   }
 };
@@ -62,13 +53,26 @@ router.post(
   "/relays",
   checkAuth,
   async (request, env: Env, context: ExecutionContext) => {
-    const relay = (await request.json()) as WORKER_OUTPUT_RELAY_SINGLE;
+    const maybeRelay = await request.json();
+
+    const parseResult = RelaySchema.safeParse(maybeRelay);
+    if (!parseResult.success) {
+      return Response.json(
+        { error: "invalid", code: "#jlbfq4" },
+        { status: 400 }
+      );
+    }
+
+    const relay = parseResult.data;
     const { url } = relay;
     const existingRelay = await env.relays.get(url);
+
     if (existingRelay !== null) {
       return Response.json({ error: "exists" }, { status: 400 });
     }
+
     await env.relays.put(url, JSON.stringify(relay));
+
     return Response.json({ success: true }, { status: 201 });
   }
 );
@@ -87,9 +91,18 @@ router.post(
   "/kinds",
   checkAuth,
   async (request, env: Env, context: ExecutionContext) => {
-    const kindData = (await request.json()) as KindMeta;
-    // TODO - Check `kindData` against a schema
+    const maybeKindData = await request.json();
 
+    const parseResult = KindMetaSchema.safeParse(maybeKindData);
+
+    if (!parseResult.success) {
+      return Response.json(
+        { error: "invalid", code: "#4fhAeE" },
+        { status: 400 }
+      );
+    }
+
+    const kindData = parseResult.data;
     const { kind } = kindData;
 
     const existingKind = (await env.kinds.get(kind.toString(), {
@@ -129,10 +142,6 @@ router.get(
 );
 
 router.all("*", () => Response.json({ error: "not found" }, { status: 404 }));
-
-addEventListener("fetch", (event) =>
-  event.respondWith(router.handle(event.request))
-);
 
 export default {
   async fetch(
