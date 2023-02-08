@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { KindMeta } from '../../../../../shared/types';
-	export let data: { kind: KindMeta };
+	import type { WORKER_OUTPUT_KIND_SINGLE } from '../../../../../shared/types';
+
+	export let data: WORKER_OUTPUT_KIND_SINGLE;
 </script>
 
 <h1>

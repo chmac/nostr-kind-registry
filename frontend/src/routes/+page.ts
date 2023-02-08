@@ -1,10 +1,9 @@
 import { WORKER_URL } from '../../../shared/constants';
-export const load = async () => {
-	const response = await fetch(WORKER_URL);
-	const json = await response.json();
-	const kinds = json.kinds;
-	console.log('kinds', kinds);
-	return {
-		kinds
-	};
+import type { WORKER_OUTPUT_SEEN_KINDS } from '../../../shared/types';
+
+export const load = async (): Promise<WORKER_OUTPUT_SEEN_KINDS> => {
+	const response = await fetch(`${WORKER_URL}/kinds`);
+	const json = (await response.json()) as WORKER_OUTPUT_SEEN_KINDS;
+	const sortedKinds = json.kinds.sort((a, b) => a - b);
+	return { kinds: sortedKinds };
 };
