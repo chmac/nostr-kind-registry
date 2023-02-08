@@ -1,8 +1,31 @@
+import { WORKER_URL } from "../constants.ts";
+
 const MAX = 40e3;
 
-const getRandomKind = (max: number) => Math.floor(Math.random() * max);
+const getSeenKinds = async () => {
+  const result = await fetch(`${WORKER_URL}`);
+  const { kinds } = (await result.json()) as { kinds: number[] };
+  console.log("#No2hCK getSeenKinds()", result, kinds);
+  return kinds;
+};
 
-// deno-lint-ignore require-await
+// NOTE: Kinds 20'000 - 29'999 are excluded
+const getAllKinds = (max: number) => {
+  const allKinds = Array.from({ length: max }).map((_, i) => i);
+  const withoutExcluded = allKinds.slice(0, 20e3).concat(allKinds.slice(30e3));
+  return withoutExcluded;
+};
+
+const randomItem = <T>(input: T[]): T =>
+  input[Math.floor(Math.random() * input.length)];
+
+const randomItems = <T>(input: T[], count: number): T[] =>
+  Array.from({ length: count }).map(() => randomItem(input));
+
 export const getRandomKinds = async (count: number, max = MAX) => {
-  return Array.from({ length: count }).map(() => getRandomKind(max));
+  const seenKinds = await getSeenKinds();
+  const allKinds = getAllKinds(max);
+  const unseenKinds = allKinds.filter((kind) => !seenKinds.includes(kind));
+  const randomKinds = randomItems(unseenKinds, count);
+  return randomKinds;
 };
