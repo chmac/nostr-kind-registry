@@ -3,6 +3,6 @@ main = "src/index.ts"
 compatibility_date = "2023-02-07"
 
 kv_namespaces = [
-  { binding = "kinds", id = "53c969db21a24e9b8e1bb0e0d1e11ef5", preview_id = "31baa22ab44e4d12abcbb9c446f6dbbe" },
-  { binding = "relays", id = "75c74a36325043cfbd7ecac49aa8ccd1", preview_id = "e5b879084a3d4f4597320c0167d5b59c" },
+  { binding = "kinds", id = "53c969db21a24e9b8e1bb0e0d1e11ef5", preview_id = "53c969db21a24e9b8e1bb0e0d1e11ef5" },
+  { binding = "relays", id = "75c74a36325043cfbd7ecac49aa8ccd1", preview_id = "75c74a36325043cfbd7ecac49aa8ccd1" },
 ]
