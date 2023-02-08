@@ -18,7 +18,7 @@ export const awaitForEachWithDelay = async <T>(
   await input.reduce(async (last, currentValue, index) => {
     await last;
     await iterator(currentValue);
-    if (index < input.length) {
+    if (index + 1 < input.length) {
       await async.delay(delayMs);
     }
   }, Promise.resolve());
