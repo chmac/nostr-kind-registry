@@ -29,14 +29,12 @@
 	</li>
 	<li>
 		<a href="" on:click={handleGetEventClick}>get event details</a>
-	</li>
-	<li>
 		<pre>
-		{#await eventPromise then event}
+			{#await eventPromise then event}
 				{JSON.stringify(event, null, 2)}
 			{:catch error}
 				<span style="color: red">{error}</span>
 			{/await}
-	</pre>
+		</pre>
 	</li>
 </ul>

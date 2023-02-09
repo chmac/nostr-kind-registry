@@ -1,7 +1,7 @@
 import type { NostrEvent } from '../../../shared/types';
 import { relayInit } from 'nostr-tools';
 
-export async function getEventKindFromRelay(kind: number, relayUrl: string) {
+export async function getEventKindFromRelay(kind: number, relayUrl: string): Promise<NostrEvent> {
 	// const sampleEvent: NostrEvent = {
 	// 	id: 'someid',
 	// 	sig: 'somesig',
