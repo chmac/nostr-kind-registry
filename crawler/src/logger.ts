@@ -1,16 +1,25 @@
 import { log } from "../deps.ts";
 import { Options } from "../types.ts";
 
+const calculateConsoleLevel = (
+  options: Pick<Options, "debug" | "verbose" | "silent">
+) => {
+  if (options.debug) {
+    return "DEBUG";
+  }
+  if (options.verbose) {
+    return "ERROR";
+  }
+  if (options.silent) {
+    return "CRITICAL";
+  }
+  return "INFO";
+};
+
 export const createLogger = async (
   options: Pick<Options, "debug" | "verbose" | "silent">
 ) => {
-  const consoleLevel = options.debug
-    ? "DEBUG"
-    : options.verbose
-    ? "ERROR"
-    : options.silent
-    ? "CRITICAL"
-    : "INFO";
+  const consoleLevel = calculateConsoleLevel(options);
 
   await log.setup({
     handlers: {
