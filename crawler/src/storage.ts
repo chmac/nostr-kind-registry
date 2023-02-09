@@ -4,6 +4,8 @@ import { fs, path, run, uuid } from "../deps.ts";
 
 type Options = Pick<BaseOptions, "dataPath" | "dataRepoUrl" | "logger">;
 
+const FALLBACK_DATE = new Date(16e11).toISOString();
+
 const getFileNameFromKind = (kind: number): string => {
   return `kind${kind.toString()}.json`;
 };
@@ -141,11 +143,12 @@ const gitAddCommitAndPush = async (options: Options, message: string) => {
 
 export const addKindToKindsList = async (
   options: Options,
-  kind: number
+  kind: KindMeta
 ): Promise<void> => {
   const kindsListPath = getKindsListPath(options);
   // TODO - Add time here so we can sort
-  const kindString = `${kind.toString()}\n`;
+  const dateString = kind.firstSeenDateString || FALLBACK_DATE;
+  const kindString = `${kind.kind.toString()},${dateString}\n`;
   await Deno.writeTextFile(kindsListPath, kindString, { append: true });
 };
 
@@ -161,7 +164,7 @@ export const writeKindMeta = async (
   if (existingFileType !== "non-existent") {
     throw new Error("#Gxq5jx Cannot overwrite existing kind");
   }
-  await addKindToKindsList(options, kind.kind);
+  await addKindToKindsList(options, kind);
   await Deno.writeTextFile(kindMetaPath, fileContents);
   await gitAddCommitAndPush(options, `Creating kind ${kind.kind}`);
 };

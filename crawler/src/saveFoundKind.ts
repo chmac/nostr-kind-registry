@@ -17,7 +17,7 @@ export const saveFoundKind = async ({
   const newKindMeta: KindMeta = {
     kind,
     seen: true,
-    firstSeenTimestamp: Math.floor(Date.now() / 1e3),
+    firstSeenDateString: new Date().toISOString(),
     seenOnRelays: [relayUrl],
   };
 

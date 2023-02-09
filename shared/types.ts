@@ -18,7 +18,7 @@ export type WORKER_OUTPUT_RELAYS = Relay[];
 export type KindMeta = {
   kind: number;
   seen: boolean;
-  firstSeenTimestamp?: number;
+  firstSeenDateString?: string;
   seenOnRelays?: string[];
   relatedNips?: number[];
   implementationUrls?: string[];
