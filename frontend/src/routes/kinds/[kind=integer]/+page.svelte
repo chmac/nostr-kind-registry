@@ -1,6 +1,14 @@
 <script lang="ts">
-	import type { PageData } from "./$types";
-	export let data: PageData
+	import type { PageData } from './$types';
+	import type { NostrEvent } from '../../../../../shared/types';
+	import { getEventKindFromRelay } from '../../../lib/nostr';
+	export let data: PageData;
+
+	let eventPromise: Promise<NostrEvent> = new Promise(() => {});
+
+	function handleGetEventClick() {
+		eventPromise = getEventKindFromRelay(data.kind.kind, data.kind.seenOnRelays?.at(0) ?? '');
+	}
 </script>
 
 <h1>
@@ -18,5 +26,17 @@
 		Related Implementations: {@html data.kind.implementationUrls
 			?.map((i) => `<a href="${i}">${i}</a>`)
 			.join('; ')}
+	</li>
+	<li>
+		<a href="" on:click={handleGetEventClick}>get event details</a>
+	</li>
+	<li>
+		<pre>
+		{#await eventPromise then event}
+				{JSON.stringify(event, null, 2)}
+			{:catch error}
+				<span style="color: red">{error}</span>
+			{/await}
+	</pre>
 	</li>
 </ul>
