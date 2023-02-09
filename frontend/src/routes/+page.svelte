@@ -8,7 +8,7 @@
 <ul>
 	{#each data.kinds as kind}
 		<li>
-			<a href="/kinds/{kind}">Kind {kind}</a>
+			<a href="/kinds/{kind.kind}">Kind {kind.kind}</a>
 		</li>
 	{/each}
 </ul>

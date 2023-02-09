@@ -1,13 +1,14 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	export let data: PageData
+	console.log('#AmmMoo PageData', data)
 </script>
 
 <h1>
 	Kind {data.kind.kind}
 </h1>
 <ul>
-	<li>First seen: {data.kind.firstSeenTimestamp}</li>
+	<li>First seen: {data.kind.firstSeenDateString}</li>
 	<li>Seen on relays: {data.kind.seenOnRelays?.join('; ')}</li>
 	<li>
 		Related NIPs: {@html data.kind.relatedNips
