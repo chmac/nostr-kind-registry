@@ -2,7 +2,10 @@ import { KindMeta, Relay } from "../../shared/types.ts";
 import { Options as BaseOptions } from "../types.ts";
 import { fs, path, run, uuid } from "../deps.ts";
 
-type Options = Pick<BaseOptions, "dataPath" | "dataRepoUrl" | "logger">;
+type Options = Pick<
+  BaseOptions,
+  "dataPath" | "dataRepoUrl" | "logger" | "debug"
+>;
 
 const FALLBACK_DATE = new Date(16e11).toISOString();
 
@@ -102,7 +105,7 @@ export const gitPull = async (
   ifLastPulledMoreThanSecondsAgo = 300
 ) => {
   await assertDataRepoExistsAndCloneIfNot(options);
-  const runOpts = { cwd: options.dataPath };
+  const runOpts = { cwd: options.dataPath, verbose: options.debug };
   try {
     const stat = await Deno.stat(
       path.join(options.dataPath, "/.git/FETCH_HEAD")
@@ -127,7 +130,7 @@ export const gitPull = async (
 const gitAddCommitAndPush = async (options: Options, message: string) => {
   // TODO - Decide if we really want `gitPull()` here
   await gitPull(options, 0);
-  const runOpts = { cwd: options.dataPath };
+  const runOpts = { cwd: options.dataPath, verbose: options.debug };
   const hasChanges = await doesRepoHaveChanges(options.dataPath);
   if (!hasChanges) {
     // There are no changed files, so there's nothing else to do
@@ -137,7 +140,7 @@ const gitAddCommitAndPush = async (options: Options, message: string) => {
     return;
   }
   await run("git add .", runOpts);
-  await run(["git", "commit", "-m", message], { ...runOpts });
+  await run(["git", "commit", "-m", message], runOpts);
   await run("git push", runOpts);
 };
 
