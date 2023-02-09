@@ -203,7 +203,7 @@ export const getAllRelays = async (options: Options): Promise<Relay[]> => {
   const list = await Deno.readDir(relaysPath);
   const relays: Relay[] = [];
   for await (const item of list) {
-    if (!item.isFile) {
+    if (!item.isFile || item.name.startsWith(".")) {
       continue;
     }
     const jsonString = await Deno.readTextFile(
