@@ -12,8 +12,6 @@ export const createLogger = async (
     ? "CRITICAL"
     : "INFO";
 
-  console.log("#yMmDP4 Init logger", consoleLevel);
-
   await log.setup({
     handlers: {
       console: new log.handlers.ConsoleHandler(consoleLevel, {
