@@ -1,14 +1,37 @@
 import { WORKER_URL } from "../shared/constants.ts";
+import { KindMeta } from "../shared/types.ts";
 import { cliffy } from "./deps.ts";
+import { createLogger } from "./src/logger.ts";
+import {
+  getKindMeta,
+  getKinds,
+  writeKindMeta,
+  writeRelayUrl,
+} from "./src/storage.ts";
 import { crawl } from "./src/crawl.ts";
 
 const command = new cliffy.Command()
   .name("crawl")
   .description("Crawl nostr relays searching for new kinds")
   .version("0.1.0")
-  .globalEnv("AUTH_KEY=<authKey:string>", "Set the authentication key", {
-    required: true,
-  })
+  .globalEnv(
+    "DATA_PATH=<dataPath:string>",
+    "Set the path to the data repository",
+    {
+      required: true,
+    }
+  )
+  .globalEnv(
+    "DATA_REPO_URL=<dataRepoUrl:string>",
+    "The url (including any required authentication) to the data repository",
+    { required: true }
+  )
+  .globalOption("-v, --verbose", "Log every step in the process")
+  .globalOption("-d, --debug", "Output debugging logs")
+  .globalOption(
+    "-s, --silent",
+    "Suppress all output (is overridden by --verbose or --debug)"
+  )
   .option(
     "-r.c, --relays.count <relayCount:integer>",
     "How many relays to crawl",
@@ -38,29 +61,17 @@ const command = new cliffy.Command()
     "The highest kind to check",
     { default: 40e3 }
   )
-  .option("-v, --verbose", "Log every step in the process")
-  .action(crawl)
+  .action(async (options) => {
+    const logger = await createLogger(options);
+    await crawl({ ...options, logger });
+  })
   .command(
     "add-relay <relayUrl:string>",
     "Add a relay to the list of stored relays"
   )
   .action(async (options, relayUrl) => {
-    const result = await fetch(WORKER_URL, {
-      body: JSON.stringify({ url: relayUrl }),
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: options.authKey,
-      },
-    });
-
-    if (result.status !== 201) {
-      const message = "#B3WYru Error saving relay";
-      console.error(message, result.status);
-      console.error(await result.text());
-      throw new Error(message);
-    }
+    await createLogger(options);
+    await writeRelayUrl(options, relayUrl);
   });
 
 try {
