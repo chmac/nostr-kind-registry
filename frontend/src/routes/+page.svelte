@@ -7,7 +7,7 @@
 		const max = 40_000;
 		while (true) {
 			let randomKind = Math.floor(Math.random() * (max - min) + min);
-			if (!data.kinds.includes(randomKind)) return randomKind;
+			if (!data.kinds.find(({kind}) => kind === randomKind)) return randomKind;
 		}
 	}
 
