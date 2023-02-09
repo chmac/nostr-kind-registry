@@ -109,7 +109,7 @@ export const gitPull = async (
     if (
       !pullNow &&
       stat.mtime !== null &&
-      stat.mtime.getTime() < Date.now() - ifLastPulledMoreThanSeconds * 1e3
+      stat.mtime.getTime() > Date.now() - ifLastPulledMoreThanSecondsAgo * 1e3
     ) {
       return;
     }
