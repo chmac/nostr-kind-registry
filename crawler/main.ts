@@ -78,6 +78,10 @@ try {
   await command.parse();
 } catch (error) {
   console.error("#UVxW6D Exiting with error now");
-  console.error(error);
+  if (error instanceof Error) {
+    console.error(error);
+  } else {
+    console.error(JSON.stringify(error));
+  }
   Deno.exit(1);
 }
