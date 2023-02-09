@@ -216,12 +216,18 @@ export const getAllRelays = async (options: Options): Promise<Relay[]> => {
 };
 
 export const writeRelayUrl = async (options: Options, relayUrl: string) => {
-  // TODO - Check to make sure this relay does not currently exist
   await gitPull(options);
   const relay: Relay = {
     id: uuid.v1.generate() as string,
     url: relayUrl,
   };
+
+  const relays = await getAllRelays(options);
+  const existingRelay = relays.find((relay) => relay.url === relayUrl);
+  if (typeof existingRelay !== "undefined") {
+    throw new Error("#OCbuNg Cannot add existing relay");
+  }
+
   const relayPath = getRelayPath(options, relay.id);
   const relayJson = JSON.stringify(relay);
   await Deno.writeTextFile(relayPath, relayJson);
