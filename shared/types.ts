@@ -6,18 +6,19 @@ export type WORKER_OUTPUT_KIND_SINGLE = {
   kind: KindMeta;
 };
 
-export type WORKER_OUTPUT_RELAY_SINGLE = {
+export type Relay = {
+  id: string;
   url: string;
 };
 
-export type WORKER_OUTPUT_RELAYS = WORKER_OUTPUT_RELAY_SINGLE[];
+export type WORKER_OUTPUT_RELAYS = Relay[];
 
 // NOTE: This is not shared with `workers/src/schemas.ts` because that uses
 // `zod` and we can't easily share zod schemas between node and deno code
 export type KindMeta = {
   kind: number;
   seen: boolean;
-  firstSeenTimestamp?: number;
+  firstSeenDateString?: string;
   seenOnRelays?: string[];
   relatedNips?: number[];
   implementationUrls?: string[];

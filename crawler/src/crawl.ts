@@ -1,44 +1,25 @@
 import { NostrEvent } from "../../shared/types.ts";
 import { nostr } from "../deps.ts";
+import { Options } from "../types.ts";
 import { awaitForEachWithDelay } from "./async.ts";
 import { getRandomKinds } from "./getRandomKinds.ts";
-import { getRelays } from "./getRelays.ts";
+import { getRandomRelays } from "./getRandomRelays.ts";
 import { saveFoundKind } from "./saveFoundKind.ts";
-
-const logFactory = (verbose?: boolean) => (verbose ? console.log : () => {});
-
-type Options = {
-  relays: {
-    count: number;
-    subscriptions: number;
-    delay: number;
-  };
-  kinds: {
-    perSubscription: number;
-    maximum: number;
-  };
-  verbose?: boolean | undefined;
-  authKey: string;
-};
 
 const crawlRelay = async ({
   client,
   options,
-  log,
   relayUrl,
 }: {
   client: nostr.Nostr;
   options: Options;
-  log: ReturnType<typeof logFactory>;
   relayUrl: string;
 }) => {
+  const { logger } = options;
   await awaitForEachWithDelay(
     Array.from({ length: options.relays.subscriptions }),
     async () => {
-      const kinds = await getRandomKinds(
-        options.kinds.perSubscription,
-        options.kinds.maximum
-      );
+      const kinds = await getRandomKinds(options);
 
       const events = await client
         .filter({
@@ -47,11 +28,11 @@ const crawlRelay = async ({
         })
         .collect();
 
-      log("#lMer4G Subscribing for kinds", kinds.join(", "));
+      logger.debug("#lMer4G Subscribing for kinds", kinds.join(", "));
 
       if (events.length > 0) {
         const event = events[0] as NostrEvent;
-        saveFoundKind({ event, relayUrl, authKey: options.authKey });
+        saveFoundKind({ options, event, relayUrl });
       }
     },
     options.relays.delay * 1e3
@@ -59,19 +40,18 @@ const crawlRelay = async ({
 };
 
 export const crawl = async (options: Options) => {
-  const log = logFactory(options.verbose);
-
-  const relayUrls = await getRelays(options.relays.count);
-  log("#d0T3uX Got relayUrls", relayUrls);
+  const { logger } = options;
+  const relayUrls = await getRandomRelays(options);
+  logger.debug("#d0T3uX Got relayUrls", relayUrls);
 
   await Promise.allSettled(
     relayUrls.map(async (relayUrl) => {
       try {
-        console.log("#GmECia Connecting to relay", relayUrl);
+        logger.info("#GmECia Connecting to relay", relayUrl);
         const client = new nostr.Nostr();
         client.relayList.push({ name: relayUrl, url: relayUrl } as never);
 
-        log("#LHc6qS Connecting to relay", relayUrl);
+        logger.debug("#LHc6qS Connecting to relay", relayUrl);
         try {
           await client.connect();
         } catch (error) {
@@ -81,7 +61,7 @@ export const crawl = async (options: Options) => {
           return;
         }
 
-        await crawlRelay({ client, options, log, relayUrl });
+        await crawlRelay({ client, options, relayUrl });
 
         client.disconnect();
       } catch (error) {

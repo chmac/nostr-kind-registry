@@ -1,44 +1,33 @@
-import { WORKER_URL } from "../../shared/constants.ts";
 import { KindMeta, NostrEvent } from "../../shared/types.ts";
+import { Options } from "../types.ts";
+import { writeKindMeta } from "./storage.ts";
 
 export const saveFoundKind = async ({
+  options,
   event,
   relayUrl,
-  authKey,
 }: {
+  options: Options;
   event: NostrEvent;
   relayUrl: string;
-  authKey: string;
 }) => {
+  const { logger } = options;
   const { kind } = event;
-  const foundNewKind: KindMeta = {
+
+  const newKindMeta: KindMeta = {
     kind,
     seen: true,
-    firstSeenTimestamp: Math.floor(Date.now() / 1e3),
+    firstSeenDateString: new Date().toISOString(),
     seenOnRelays: [relayUrl],
   };
-  console.log("#p1tYsu Found a new kind! 🚀🚀🚀");
-  console.log(foundNewKind);
-  console.log(event);
+
+  logger.info("#p1tYsu Found a new kind! 🚀🚀🚀");
+  logger.info(newKindMeta);
+  logger.info(event);
+
   try {
-    const putResult = await fetch(`${WORKER_URL}/${kind}`, {
-      method: "put",
-      body: JSON.stringify(foundNewKind),
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: authKey,
-      },
-    });
-    const putResultBody = await putResult.json();
-    if (putResult.status !== 201 || putResultBody.success !== true) {
-      const message = "#Uedt1e Failed to save found kind";
-      console.error(message);
-      console.error(putResultBody);
-      console.error(putResult);
-      throw new Error(message);
-    }
+    await writeKindMeta(options, newKindMeta);
   } catch (error) {
-    console.error("#HDufs6 Failed to PUT new kind", error);
+    console.error("#HDufs6 Failed to save new kind", error);
   }
 };
