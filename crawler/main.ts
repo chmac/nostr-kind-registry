@@ -70,8 +70,8 @@ const command = new cliffy.Command()
     "Add a relay to the list of stored relays"
   )
   .action(async (options, relayUrl) => {
-    await createLogger(options);
-    await writeRelayUrl(options, relayUrl);
+    const logger = await createLogger(options);
+    await writeRelayUrl({ ...options, logger }, relayUrl);
   });
 
 try {
