@@ -2,7 +2,7 @@ import { KindMeta, Relay } from "../../shared/types.ts";
 import { Options as BaseOptions } from "../types.ts";
 import { fs, path, run, uuid } from "../deps.ts";
 
-type Options = Pick<BaseOptions, "dataPath" | "dataRepoUrl">;
+type Options = Pick<BaseOptions, "dataPath" | "dataRepoUrl" | "logger">;
 
 const getFileNameFromKind = (kind: number): string => {
   return `kind${kind.toString()}.json`;
@@ -97,7 +97,7 @@ const doesRepoHaveChanges = async (repoPath: string) => {
 
 export const gitPull = async (
   options: Options,
-  ifLastPulledMoreThanSeconds = 300
+  ifLastPulledMoreThanSecondsAgo = 300
 ) => {
   await assertDataRepoExistsAndCloneIfNot(options);
   const runOpts = { cwd: options.dataPath };
@@ -105,7 +105,7 @@ export const gitPull = async (
     const stat = await Deno.stat(
       path.join(options.dataPath, "/.git/FETCH_HEAD")
     );
-    const pullNow = ifLastPulledMoreThanSeconds === 0;
+    const pullNow = ifLastPulledMoreThanSecondsAgo === 0;
     if (
       !pullNow &&
       stat.mtime !== null &&
@@ -123,12 +123,15 @@ export const gitPull = async (
 };
 
 const gitAddCommitAndPush = async (options: Options, message: string) => {
+  // TODO - Decide if we really want `gitPull()` here
   await gitPull(options, 0);
   const runOpts = { cwd: options.dataPath };
   const hasChanges = await doesRepoHaveChanges(options.dataPath);
   if (!hasChanges) {
     // There are no changed files, so there's nothing else to do
-    console.warn("#lh688b gitCommitAndPush called without repo changes");
+    options.logger.warning(
+      "#lh688b gitCommitAndPush called without repo changes"
+    );
     return;
   }
   await run("git add .", runOpts);
@@ -141,6 +144,7 @@ export const addKindToKindsList = async (
   kind: number
 ): Promise<void> => {
   const kindsListPath = getKindsListPath(options);
+  // TODO - Add time here so we can sort
   const kindString = `${kind.toString()}\n`;
   await Deno.writeTextFile(kindsListPath, kindString, { append: true });
 };
@@ -209,6 +213,7 @@ export const getAllRelays = async (options: Options): Promise<Relay[]> => {
 };
 
 export const writeRelayUrl = async (options: Options, relayUrl: string) => {
+  // TODO - Check to make sure this relay does not currently exist
   await gitPull(options);
   const relay: Relay = {
     id: uuid.v1.generate() as string,

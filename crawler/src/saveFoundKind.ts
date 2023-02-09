@@ -11,6 +11,7 @@ export const saveFoundKind = async ({
   event: NostrEvent;
   relayUrl: string;
 }) => {
+  const { logger } = options;
   const { kind } = event;
 
   const newKindMeta: KindMeta = {
@@ -20,9 +21,9 @@ export const saveFoundKind = async ({
     seenOnRelays: [relayUrl],
   };
 
-  console.log("#p1tYsu Found a new kind! 🚀🚀🚀");
-  console.log(newKindMeta);
-  console.log(event);
+  logger.info("#p1tYsu Found a new kind! 🚀🚀🚀");
+  logger.info(newKindMeta);
+  logger.info(event);
 
   try {
     await writeKindMeta(options, newKindMeta);
