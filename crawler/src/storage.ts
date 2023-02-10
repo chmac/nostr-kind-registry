@@ -139,7 +139,13 @@ const gitAddCommitAndPush = async (options: Options, message: string) => {
     return;
   }
   await run("git add .", runOpts);
-  await run(["git", "commit", "-m", message], runOpts);
+  await run(["git", "commit", "-m", message], {
+    ...runOpts,
+    env: {
+      GIT_COMMITTER_NAME: "NKR",
+      GIT_COMMITTER_EMAIL: "nkr@dev.null",
+    },
+  });
   await run("git push", runOpts);
 };
 
