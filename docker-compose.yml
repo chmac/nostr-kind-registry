@@ -12,7 +12,5 @@ services:
       - RELAYS_DELAY=30
       - KINDS_PER_SUBSCRIPTION=300
       - KINDS_MAXIMUM=40000
-      - GIT_COMMITTER_NAME="NKR"
-      - GIT_COMMITTER_EMAIL="nkr@dev.null"
     volumes:
       - ${LOCAL_REPO_PATH}:/data
