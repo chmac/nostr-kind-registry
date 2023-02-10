@@ -1,0 +1,18 @@
+version: "3.6"
+
+services:
+  crawler:
+    build: .
+    environment:
+      - LOG_LEVEL=DEBUG
+      - DATA_PATH=/data/
+      - DATA_REPO_URL=${DATA_REPO_URL}
+      - RELAYS_IN_PARALLEL=3
+      - RELAYS_SUBSCRIPTIONS=10
+      - RELAYS_DELAY=30
+      - KINDS_PER_SUBSCRIPTION=300
+      - KINDS_MAXIMUM=40000
+      - GIT_COMMITTER_NAME="NKR"
+      - GIT_COMMITTER_EMAIL="nkr@dev.null"
+    volumes:
+      - ${LOCAL_REPO_PATH}:/data
