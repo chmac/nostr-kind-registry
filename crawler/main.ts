@@ -1,15 +1,15 @@
 import { cliffy } from "./deps.ts";
-import { crawl } from "./src/crawl.ts";
+import { crawl, start } from "./src/crawl.ts";
 import { addLogger } from "./src/logger.ts";
-import { addDefaultOptionValues } from "./src/options.ts";
+import { addDefaultOptionValues, DEFAULT_LOG_LEVEL } from "./src/options.ts";
 import { writeRelayUrl } from "./src/storage.ts";
 import { calculateLogLevel } from "./src/utils.ts";
 
 const LogLevelType = new cliffy.EnumType([
-  "silent",
-  "info",
-  "verbose",
-  "debug",
+  "CRITICAL",
+  "ERROR",
+  "INFO",
+  "DEBUG",
 ]);
 
 const command = new cliffy.Command()
@@ -76,37 +76,39 @@ const command = new cliffy.Command()
     const optionsWithDefaults = addDefaultOptionValues(optionsWithLogger);
     await writeRelayUrl(optionsWithDefaults, relayUrl);
   })
-  .type("LogLevel", LogLevelType)
-  .env("LOG_LEVEL=<logLevel:LogLevel>", "Set the log level (defaults to info)")
-  .env(
-    "RELAYS_IN_PARALLEL=<relaysInParallel:int>",
-    "How many relays to connect to in parallel"
-  )
-  .env(
-    "RELAYS_SUBSCRIPTIONS=<relaySubscriptions:int>",
-    "How many subscriptions to make per relay (before switching relays)"
-  )
-  .env(
-    "RELAYS_DELAY=<relaysDelay:int>",
-    "How long to wait between subscriptions (in seconds)"
-  )
-  .env(
-    "KINDS_PER_SUBSCRIPTION=<kindsPerFilter:int>",
-    "How many kinds to request per subscription"
-  )
-  .env(
-    "KINDS_MAXIMUM=<kindsMaximum:int>",
-    "The maximum kind number to search for (defines the search space)"
-  )
   .command(
     "start",
     "Start a crawler and run forever (for docker containers, etc)"
   )
+  .type("LogLevel", LogLevelType)
+  .env("LOG_LEVEL=<logLevel:LogLevel>", "Set the log level (defaults to info)")
+  .env(
+    "RELAYS_IN_PARALLEL=<relaysInParallel:integer>",
+    "How many relays to connect to in parallel"
+  )
+  .env(
+    "RELAYS_SUBSCRIPTIONS=<relaySubscriptions:integer>",
+    "How many subscriptions to make per relay (before switching relays)"
+  )
+  .env(
+    "RELAYS_DELAY=<relaysDelay:integer>",
+    "How long to wait between subscriptions (in seconds)"
+  )
+  .env(
+    "KINDS_PER_SUBSCRIPTION=<kindsPerFilter:integer>",
+    "How many kinds to request per subscription"
+  )
+  .env(
+    "KINDS_MAXIMUM=<kindsMaximum:integer>",
+    "The maximum kind number to search for (defines the search space)"
+  )
   .action(async (options) => {
-    const logLevel = calculateLogLevel(options);
-    const optionsWithLogger = await addLogger(options, logLevel);
+    const optionsWithLogger = await addLogger(
+      options,
+      options.logLevel || DEFAULT_LOG_LEVEL
+    );
     const optionsWithDefaults = addDefaultOptionValues(optionsWithLogger);
-    // TODO - Implement continuous crawling
+    await start(optionsWithDefaults);
   });
 
 try {

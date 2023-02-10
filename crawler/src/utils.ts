@@ -1,4 +1,4 @@
-import { FlagOptions } from "./options.ts";
+import { OptionalFlagOptions } from "./options.ts";
 
 export const randomItem = <T>(input: T[]): T =>
   input[Math.floor(Math.random() * input.length)];
@@ -7,7 +7,7 @@ export const randomItem = <T>(input: T[]): T =>
 export const randomItems = <T>(input: T[], count: number): T[] =>
   Array.from({ length: count }).map(() => randomItem(input));
 
-export const calculateLogLevel = (options: FlagOptions) => {
+export const calculateLogLevel = (options: OptionalFlagOptions) => {
   if (options.debug) {
     return "DEBUG";
   }

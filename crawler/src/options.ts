@@ -1,5 +1,6 @@
 import { log } from "../deps.ts";
 
+export const DEFAULT_LOG_LEVEL = "INFO";
 const DEFAULT_DATA_PATH = "/app/data/";
 const DEFAULT_RELAYS_IN_PARALLEL = 12;
 const DEFAULT_RELAYS_SUBSCRIPTIONS = 1;
@@ -89,6 +90,11 @@ export const addDefaultOptionValues = (
         DEFAULT_KINDS_MAXIMUM,
     },
   };
+
+  incoming.logger.debug(
+    "#0pCGGX Calculated options with defaults",
+    withDefaults
+  );
 
   return withDefaults;
 };
