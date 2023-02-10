@@ -1,7 +1,13 @@
-FROM denoland/deno:alpine-1.30.3
+# FROM denoland/deno:alpine-1.30.3
+FROM denoland/deno:1.30.3
 
 # Add git to our slim container, it's not included by default
-RUN apk add --no-cache git
+# RUN apk add --no-cache git
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  git \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 USER deno
 
