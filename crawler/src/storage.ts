@@ -1,6 +1,10 @@
 import { KindMeta, Relay } from "../../shared/types.ts";
 import { fs, log, Mutex, path, run, uuid } from "../deps.ts";
-import { GlobalOptions, LoggerOption } from "./options.ts";
+import {
+  DefaultOptionsWithLogger,
+  GlobalOptions,
+  LoggerOption,
+} from "./options.ts";
 
 type Options = GlobalOptions & LoggerOption;
 
@@ -77,8 +81,10 @@ const assertDataRepoExistsAndCloneIfNotLock = new Mutex();
 const assertDataRepoExistsAndCloneIfNot = async (options: Options) => {
   const lockId = await assertDataRepoExistsAndCloneIfNotLock.acquire();
   const release = () => assertDataRepoExistsAndCloneIfNotLock.release(lockId);
+  const verbose = options.logger.level <= log.LogLevels.DEBUG;
   const runOpts = {
     cwd: options.dataPath,
+    verbose,
   };
   await fs.ensureDir(options.dataPath);
   const gitPath = path.join(options.dataPath, ".git");
@@ -107,9 +113,11 @@ const assertDataRepoExistsAndCloneIfNot = async (options: Options) => {
 };
 
 const doesRepoHaveChangesLock = new Mutex();
-const doesRepoHaveChanges = async (repoPath: string) => {
+const doesRepoHaveChanges = async (options: Options) => {
   const lockId = await doesRepoHaveChangesLock.acquire();
-  const status = await run("git status --short", { cwd: repoPath });
+  const repoPath = options.dataPath;
+  const verbose = options.logger.level <= log.LogLevels.DEBUG;
+  const status = await run("git status --short", { cwd: repoPath, verbose });
   doesRepoHaveChangesLock.release(lockId);
   return status.length !== 0;
 };
@@ -156,7 +164,7 @@ const gitAddCommitAndPush = async (options: Options, message: string) => {
   await gitPull(options, 0);
   const verbose = options.logger.level <= log.LogLevels.DEBUG;
   const runOpts = { cwd: options.dataPath, verbose };
-  const hasChanges = await doesRepoHaveChanges(options.dataPath);
+  const hasChanges = await doesRepoHaveChanges(options);
   if (!hasChanges) {
     // There are no changed files, so there's nothing else to do
     options.logger.warning(
