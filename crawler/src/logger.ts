@@ -12,7 +12,7 @@ export const addLogger = async <T>(
             typeof args !== "undefined" &&
             Array.isArray(args) &&
             args.length > 0
-              ? ` - ${JSON.stringify(args)}`
+              ? ` - ${Deno.inspect(args)}`
               : "";
           const message = `${levelName} ${msg}${argsMessage}`;
           return message;
