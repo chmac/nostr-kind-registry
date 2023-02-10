@@ -2,6 +2,13 @@ import { DefaultOptionsWithLogger } from "./options.ts";
 import { getAllRelays } from "./storage.ts";
 import { randomItems } from "./utils.ts";
 
+/**
+ * IDEA
+ *
+ * - Get relays from https://api.nostr.watch/v1/online
+ * - Cache response
+ */
+
 export const getRandomRelays = async (options: DefaultOptionsWithLogger) => {
   const relays = await getAllRelays(options);
   if (relays.length == 0) {
