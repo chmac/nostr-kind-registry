@@ -83,10 +83,35 @@ const recursivelyStartCrawler = async (
   options: DefaultOptionsWithLogger
 ): Promise<void> => {
   const { logger } = options;
+
+  const delayInMilliseconds = options.relays.delay * 1_000;
+  // Set a timeout of triple the delay time + 20 seconds, multiplied by the
+  // number of subscriptions. So each subscription can take 3 x delay + 20s.
+  // It's a pretty generous timeout.
+  // TODO - Add a config option to set the delay
+  const deadlinePerRelay =
+    options.relays.subscriptions * 3 * (delayInMilliseconds + 20_000);
+  logger.debug(
+    "#Nm677a Starting with deadline per relay (ms)",
+    deadlinePerRelay
+  );
+
   while (true) {
     try {
       const relayUrl = await getRandomRelay(options);
-      await crawlRelayUrl(options, relayUrl);
+
+      try {
+        await async.deadline(
+          crawlRelayUrl(options, relayUrl),
+          deadlinePerRelay
+        );
+      } catch (error) {
+        if (error instanceof async.DeadlineError) {
+          logger.warning("#3YWiRM Crawling timed out", relayUrl);
+        } else {
+          throw error;
+        }
+      }
       logger.info("#cVsl11 Finished crawling relay", relayUrl);
     } catch (error) {
       logger.error("#H8JbJg Error during crawl", error);
