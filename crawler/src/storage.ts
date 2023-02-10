@@ -1,5 +1,5 @@
 import { KindMeta, Relay } from "../../shared/types.ts";
-import { fs, log, path, run, uuid } from "../deps.ts";
+import { fs, log, Mutex, path, run, uuid } from "../deps.ts";
 import { GlobalOptions, LoggerOption } from "./options.ts";
 
 type Options = GlobalOptions & LoggerOption;
@@ -73,34 +73,50 @@ const getType = async (path: string) => {
   }
 };
 
+const assertDataRepoExistsAndCloneIfNotLock = new Mutex();
 const assertDataRepoExistsAndCloneIfNot = async (options: Options) => {
+  const lockId = await assertDataRepoExistsAndCloneIfNotLock.acquire();
+  const release = () => assertDataRepoExistsAndCloneIfNotLock.release(lockId);
+  const runOpts = {
+    cwd: options.dataPath,
+  };
   await fs.ensureDir(options.dataPath);
   const gitPath = path.join(options.dataPath, ".git");
   const gitPathType = await getType(gitPath);
   if (gitPathType === "directory") {
+    release();
     return;
   } else if (gitPathType === "non-existent") {
-    await run(["git", "clone", options.dataRepoUrl, "."], {
-      cwd: options.dataPath,
-    });
+    await run(["git", "clone", options.dataRepoUrl, "."], runOpts);
+    await run("git config --local author.name NKR", runOpts);
+    await run("git config --local author.email nkr@dev.null", runOpts);
     const kindsPath = getKindsPath(options);
     await fs.ensureDir(kindsPath);
     const relaysPath = getRelaysPath(options);
     await fs.ensureDir(relaysPath);
+    release();
     return;
   }
+
+  release();
   throw new Error("#uRdgmK dataDir is not git repo");
 };
 
+const doesRepoHaveChangesLock = new Mutex();
 const doesRepoHaveChanges = async (repoPath: string) => {
+  const lockId = await doesRepoHaveChangesLock.acquire();
   const status = await run("git status --short", { cwd: repoPath });
+  doesRepoHaveChangesLock.release(lockId);
   return status.length !== 0;
 };
 
+const gitPullLock = new Mutex();
 export const gitPull = async (
   options: Options,
   ifLastPulledMoreThanSecondsAgo = 300
 ) => {
+  const lockId = await gitPullLock.acquire();
+  const release = () => gitPullLock.release(lockId);
   await assertDataRepoExistsAndCloneIfNot(options);
   const verbose = options.logger.level <= log.LogLevels.DEBUG;
   const runOpts = { cwd: options.dataPath, verbose };
@@ -114,19 +130,25 @@ export const gitPull = async (
       stat.mtime !== null &&
       stat.mtime.getTime() > Date.now() - ifLastPulledMoreThanSecondsAgo * 1e3
     ) {
+      release();
       return;
     }
   } catch (error) {
     if (!(error instanceof Deno.errors.NotFound)) {
+      release();
       throw error;
     }
   }
 
   await run("git pull", runOpts);
+  release();
 };
 
+const gitAddCommitAndPushLock = new Mutex();
 const gitAddCommitAndPush = async (options: Options, message: string) => {
   // TODO - Decide if we really want `gitPull()` here
+  const lockId = await gitAddCommitAndPushLock.acquire();
+  const release = () => gitAddCommitAndPushLock.release(lockId);
   await gitPull(options, 0);
   const verbose = options.logger.level <= log.LogLevels.DEBUG;
   const runOpts = { cwd: options.dataPath, verbose };
@@ -136,6 +158,7 @@ const gitAddCommitAndPush = async (options: Options, message: string) => {
     options.logger.warning(
       "#lh688b gitCommitAndPush called without repo changes"
     );
+    release();
     return;
   }
   await run("git add .", runOpts);
@@ -147,17 +170,22 @@ const gitAddCommitAndPush = async (options: Options, message: string) => {
     },
   });
   await run("git push", runOpts);
+  release();
 };
 
+const addKindToKindsListLock = new Mutex();
 export const addKindToKindsList = async (
   options: Options,
   kind: KindMeta
 ): Promise<void> => {
+  const lockId = await addKindToKindsListLock.acquire();
+  const release = () => addKindToKindsListLock.release(lockId);
   const kindsListPath = getKindsListPath(options);
   // TODO - Add time here so we can sort
   const dateString = kind.firstSeenDateString || FALLBACK_DATE;
   const kindString = `${kind.kind.toString()},${dateString}\n`;
   await Deno.writeTextFile(kindsListPath, kindString, { append: true });
+  release();
 };
 
 export const writeKindMeta = async (
@@ -223,7 +251,10 @@ export const getAllRelays = async (options: Options): Promise<Relay[]> => {
   return relays;
 };
 
+const writeRelayUrlLock = new Mutex();
 export const writeRelayUrl = async (options: Options, relayUrl: string) => {
+  const lockId = await writeRelayUrlLock.acquire();
+  const release = () => writeRelayUrlLock.release(lockId);
   await gitPull(options);
   const relay: Relay = {
     id: uuid.v1.generate() as string,
@@ -233,6 +264,7 @@ export const writeRelayUrl = async (options: Options, relayUrl: string) => {
   const relays = await getAllRelays(options);
   const existingRelay = relays.find((relay) => relay.url === relayUrl);
   if (typeof existingRelay !== "undefined") {
+    release();
     throw new Error("#OCbuNg Cannot add existing relay");
   }
 
@@ -240,4 +272,5 @@ export const writeRelayUrl = async (options: Options, relayUrl: string) => {
   const relayJson = JSON.stringify(relay);
   await Deno.writeTextFile(relayPath, relayJson);
   await gitAddCommitAndPush(options, `Adding relay ${relayUrl}`);
+  release();
 };

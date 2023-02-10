@@ -148,6 +148,7 @@
     "https://deno.land/x/run_simple@1.1.0/mod.ts": "107de176c82574d128164e31ad7811a03ef85d67919061eed3b8f3bcecec1885",
     "https://deno.land/x/run_simple@1.1.0/src/fn.ts": "81dd8fc48e3ad1e82808ce52bc74153f4dd4a522f0982687ec4d1b9d3936f2f3",
     "https://deno.land/x/run_simple@1.1.0/src/os.ts": "58dd739ee0e24cb9d9f9e89aef37b3aaa872bfbf983eac142969840db6babec5",
-    "https://deno.land/x/run_simple@1.1.0/src/run.ts": "a6f8d6def231711aa528238971ccbd67641eb264a85d4c5d9642a03863866dde"
+    "https://deno.land/x/run_simple@1.1.0/src/run.ts": "a6f8d6def231711aa528238971ccbd67641eb264a85d4c5d9642a03863866dde",
+    "https://raw.githubusercontent.com/chmac/awaitable_mutex/switch-to-crypto-randomuuid/mod.ts": "93da0880529ce2e0d1340c7530583eb262fd636776a9797a8cbd432014528cfe"
   }
 }
