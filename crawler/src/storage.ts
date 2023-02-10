@@ -38,9 +38,14 @@ const getRelaysPath = (options: Options): string => {
   return path.join(options.dataPath, `/relays/`);
 };
 
+const getRelaysListPath = (options: Options): string => {
+  const relaysPath = getRelaysPath(options);
+  return path.join(relaysPath, "/relaysList.txt");
+};
+
 const getRelayPath = (options: Options, id: string): string => {
   const relaysPath = getRelaysPath(options);
-  return path.join(relaysPath, `${id}.json`);
+  return path.join(relaysPath, `relay_${id}.json`);
 };
 
 const getKindsPath = (options: Options): string => {
@@ -244,30 +249,19 @@ export const getKinds = async (options: Options): Promise<number[]> => {
   return kinds;
 };
 
-export const getAllRelays = async (options: Options): Promise<Relay[]> => {
+export const getAllRelayUrls = async (options: Options): Promise<string[]> => {
   await gitPull(options);
-  const relaysPath = getRelaysPath(options);
-  const list = await Deno.readDir(relaysPath);
-  const relays: Relay[] = [];
-  for await (const item of list) {
-    if (!item.isFile || item.name.startsWith(".")) {
-      continue;
-    }
-    const jsonString = await Deno.readTextFile(
-      path.join(relaysPath, item.name)
-    );
-    const relay = JSON.parse(jsonString) as Relay;
-    relays.push(relay);
-  }
-  return relays;
+  const relaysListPath = getRelaysListPath(options);
+  const relaysListString = await Deno.readTextFile(relaysListPath);
+  const relaysListLines = relaysListString.trim().split("\n");
+  return relaysListLines;
 };
 
 const addRelayUrlToRelaysListLock = new Mutex();
 const addRelayUrlToRelaysList = async (options: Options, relayUrl: string) => {
   const lockId = await addRelayUrlToRelaysListLock.acquire();
   const release = () => addRelayUrlToRelaysListLock.release(lockId);
-  const relaysPath = getRelaysPath(options);
-  const relaysListPath = path.join(relaysPath, "/relaysList.txt");
+  const relaysListPath = getRelaysListPath(options);
   const relaysListString = await Deno.readTextFile(relaysListPath);
   const relaysListLines = relaysListString.trim().split("\n");
   const existingRelayLine = relaysListLines.find((line) => line === relayUrl);
@@ -289,9 +283,9 @@ export const writeRelayUrl = async (options: Options, relayUrl: string) => {
     url: relayUrl,
   };
 
-  const relays = await getAllRelays(options);
-  const existingRelay = relays.find((relay) => relay.url === relayUrl);
-  if (typeof existingRelay !== "undefined") {
+  const relayUrls = await getAllRelayUrls(options);
+  const existingRelayUrl = relayUrls.find((entry) => entry === relayUrl);
+  if (typeof existingRelayUrl !== "undefined") {
     release();
     throw new Error("#OCbuNg Cannot add existing relay");
   }
