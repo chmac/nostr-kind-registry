@@ -142,7 +142,11 @@ const gitPull = async (
     }
   }
 
-  await run("git pull", runOpts);
+  try {
+    await run("git pull", runOpts);
+  } catch (error) {
+    options.logger.warning("#3IjfSk Git pull failed", error);
+  }
   release();
 };
 
