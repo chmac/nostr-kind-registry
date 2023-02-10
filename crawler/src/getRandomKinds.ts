@@ -1,4 +1,4 @@
-import { Options } from "../types.ts";
+import { DefaultOptionsWithLogger } from "./options.ts";
 import { getKinds } from "./storage.ts";
 import { randomItems } from "./utils.ts";
 
@@ -9,7 +9,7 @@ const getAllKinds = (max: number) => {
   return withoutExcluded;
 };
 
-export const getRandomKinds = async (options: Options) => {
+export const getRandomKinds = async (options: DefaultOptionsWithLogger) => {
   const count = options.kinds.perSubscription;
   const max = options.kinds.maximum;
   const seenKinds = await getKinds(options);

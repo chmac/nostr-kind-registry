@@ -1,14 +1,16 @@
-import { WORKER_URL } from "../shared/constants.ts";
-import { KindMeta } from "../shared/types.ts";
 import { cliffy } from "./deps.ts";
-import { createLogger } from "./src/logger.ts";
-import {
-  getKindMeta,
-  getKinds,
-  writeKindMeta,
-  writeRelayUrl,
-} from "./src/storage.ts";
 import { crawl } from "./src/crawl.ts";
+import { addLogger } from "./src/logger.ts";
+import { addDefaultOptionValues } from "./src/options.ts";
+import { writeRelayUrl } from "./src/storage.ts";
+import { calculateLogLevel } from "./src/utils.ts";
+
+const LogLevelType = new cliffy.EnumType([
+  "silent",
+  "info",
+  "verbose",
+  "debug",
+]);
 
 const command = new cliffy.Command()
   .name("crawl")
@@ -16,10 +18,7 @@ const command = new cliffy.Command()
   .version("0.1.0")
   .globalEnv(
     "DATA_PATH=<dataPath:string>",
-    "Set the path to the data repository",
-    {
-      required: true,
-    }
+    "Set the path to the data repository"
   )
   .globalEnv(
     "DATA_REPO_URL=<dataRepoUrl:string>",
@@ -33,7 +32,7 @@ const command = new cliffy.Command()
     "Suppress all output (is overridden by --verbose or --debug)"
   )
   .option(
-    "-r.c, --relays.count <relayCount:integer>",
+    "-r.i, --relays.inParallel <relayInParallel:integer>",
     "How many relays to crawl",
     {
       default: 1,
@@ -62,16 +61,52 @@ const command = new cliffy.Command()
     { default: 40e3 }
   )
   .action(async (options) => {
-    const logger = await createLogger(options);
-    await crawl({ ...options, logger });
+    const logLevel = calculateLogLevel(options);
+    const optionsWithLogger = await addLogger(options, logLevel);
+    const optionsWithDefaults = addDefaultOptionValues(optionsWithLogger);
+    await crawl(optionsWithDefaults);
   })
   .command(
     "add-relay <relayUrl:string>",
     "Add a relay to the list of stored relays"
   )
   .action(async (options, relayUrl) => {
-    const logger = await createLogger(options);
-    await writeRelayUrl({ ...options, logger }, relayUrl);
+    const logLevel = calculateLogLevel(options);
+    const optionsWithLogger = await addLogger(options, logLevel);
+    const optionsWithDefaults = addDefaultOptionValues(optionsWithLogger);
+    await writeRelayUrl(optionsWithDefaults, relayUrl);
+  })
+  .type("LogLevel", LogLevelType)
+  .env("LOG_LEVEL=<logLevel:LogLevel>", "Set the log level (defaults to info)")
+  .env(
+    "RELAYS_IN_PARALLEL=<relaysInParallel:int>",
+    "How many relays to connect to in parallel"
+  )
+  .env(
+    "RELAYS_SUBSCRIPTIONS=<relaySubscriptions:int>",
+    "How many subscriptions to make per relay (before switching relays)"
+  )
+  .env(
+    "RELAYS_DELAY=<relaysDelay:int>",
+    "How long to wait between subscriptions (in seconds)"
+  )
+  .env(
+    "KINDS_PER_SUBSCRIPTION=<kindsPerFilter:int>",
+    "How many kinds to request per subscription"
+  )
+  .env(
+    "KINDS_MAXIMUM=<kindsMaximum:int>",
+    "The maximum kind number to search for (defines the search space)"
+  )
+  .command(
+    "start",
+    "Start a crawler and run forever (for docker containers, etc)"
+  )
+  .action(async (options) => {
+    const logLevel = calculateLogLevel(options);
+    const optionsWithLogger = await addLogger(options, logLevel);
+    const optionsWithDefaults = addDefaultOptionValues(optionsWithLogger);
+    // TODO - Implement continuous crawling
   });
 
 try {

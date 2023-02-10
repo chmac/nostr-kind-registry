@@ -1,11 +1,8 @@
 import { KindMeta, Relay } from "../../shared/types.ts";
-import { Options as BaseOptions } from "../types.ts";
-import { fs, path, run, uuid } from "../deps.ts";
+import { fs, log, path, run, uuid } from "../deps.ts";
+import { GlobalOptions, LoggerOption } from "./options.ts";
 
-type Options = Pick<
-  BaseOptions,
-  "dataPath" | "dataRepoUrl" | "logger" | "debug"
->;
+type Options = GlobalOptions & LoggerOption;
 
 const FALLBACK_DATE = new Date(16e11).toISOString();
 
@@ -105,7 +102,8 @@ export const gitPull = async (
   ifLastPulledMoreThanSecondsAgo = 300
 ) => {
   await assertDataRepoExistsAndCloneIfNot(options);
-  const runOpts = { cwd: options.dataPath, verbose: options.debug };
+  const verbose = options.logger.level <= log.LogLevels.DEBUG;
+  const runOpts = { cwd: options.dataPath, verbose };
   try {
     const stat = await Deno.stat(
       path.join(options.dataPath, "/.git/FETCH_HEAD")
@@ -130,7 +128,8 @@ export const gitPull = async (
 const gitAddCommitAndPush = async (options: Options, message: string) => {
   // TODO - Decide if we really want `gitPull()` here
   await gitPull(options, 0);
-  const runOpts = { cwd: options.dataPath, verbose: options.debug };
+  const verbose = options.logger.level <= log.LogLevels.DEBUG;
+  const runOpts = { cwd: options.dataPath, verbose };
   const hasChanges = await doesRepoHaveChanges(options.dataPath);
   if (!hasChanges) {
     // There are no changed files, so there's nothing else to do

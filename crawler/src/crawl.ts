@@ -1,6 +1,6 @@
 import { NostrEvent } from "../../shared/types.ts";
 import { nostr } from "../deps.ts";
-import { Options } from "../types.ts";
+import { DefaultOptionsWithLogger } from "./options.ts";
 import { awaitForEachWithDelay } from "./async.ts";
 import { getRandomKinds } from "./getRandomKinds.ts";
 import { getRandomRelays } from "./getRandomRelays.ts";
@@ -12,7 +12,7 @@ const crawlRelay = async ({
   relayUrl,
 }: {
   client: nostr.Nostr;
-  options: Options;
+  options: DefaultOptionsWithLogger;
   relayUrl: string;
 }) => {
   const { logger } = options;
@@ -39,7 +39,7 @@ const crawlRelay = async ({
   );
 };
 
-export const crawl = async (options: Options) => {
+export const crawl = async (options: DefaultOptionsWithLogger) => {
   const { logger } = options;
   const relayUrls = await getRandomRelays(options);
   logger.debug("#d0T3uX Got relayUrls", relayUrls);

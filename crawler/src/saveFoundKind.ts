@@ -1,5 +1,5 @@
 import { KindMeta, NostrEvent } from "../../shared/types.ts";
-import { Options } from "../types.ts";
+import { GlobalOptions, LoggerOption } from "./options.ts";
 import { writeKindMeta } from "./storage.ts";
 
 export const saveFoundKind = async ({
@@ -7,7 +7,7 @@ export const saveFoundKind = async ({
   event,
   relayUrl,
 }: {
-  options: Options;
+  options: GlobalOptions & LoggerOption;
   event: NostrEvent;
   relayUrl: string;
 }) => {

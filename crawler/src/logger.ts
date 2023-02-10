@@ -1,29 +1,12 @@
 import { log } from "../deps.ts";
-import { Options } from "../types.ts";
 
-const calculateConsoleLevel = (
-  options: Pick<Options, "debug" | "verbose" | "silent">
-) => {
-  if (options.debug) {
-    return "DEBUG";
-  }
-  if (options.verbose) {
-    return "ERROR";
-  }
-  if (options.silent) {
-    return "CRITICAL";
-  }
-  return "INFO";
-};
-
-export const createLogger = async (
-  options: Pick<Options, "debug" | "verbose" | "silent">
-) => {
-  const consoleLevel = calculateConsoleLevel(options);
-
+export const addLogger = async <T>(
+  options: T,
+  logLevel: log.LevelName
+): Promise<T & { logger: log.Logger }> => {
   await log.setup({
     handlers: {
-      console: new log.handlers.ConsoleHandler(consoleLevel, {
+      console: new log.handlers.ConsoleHandler(logLevel, {
         formatter: ({ args, levelName, msg }) => {
           const argsMessage =
             typeof args !== "undefined" &&
@@ -38,12 +21,12 @@ export const createLogger = async (
     },
     loggers: {
       default: {
-        level: consoleLevel,
+        level: logLevel,
         handlers: ["console"],
       },
     },
   });
 
   const logger = log.getLogger();
-  return logger;
+  return { ...options, logger };
 };
