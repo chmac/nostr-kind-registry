@@ -103,7 +103,7 @@ export const start = async (options: DefaultOptionsWithLogger) => {
   } = options;
   logger.info("#2eYlBE Starting crawler");
 
-  await Promise.race(
+  await Promise.allSettled(
     Array.from({ length: inParallel }).map(() =>
       recursivelyStartCrawler(options)
     )
