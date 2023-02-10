@@ -86,7 +86,6 @@ const recursivelyStartCrawler = async (
   while (true) {
     try {
       const relayUrl = await getRandomRelay(options);
-      logger.info("#EoJ3as Crawling relay", relayUrl);
       await crawlRelayUrl(options, relayUrl);
     } catch (error) {
       logger.error("#H8JbJg Error during crawl", error);
