@@ -9,7 +9,7 @@ RUN apk add --no-cache git
 #   && apt-get clean \
 #   && rm -rf /var/lib/apt/lists/*
 
-USER 1000:1000
+# USER 1000:1000
 
 WORKDIR /app/
 
