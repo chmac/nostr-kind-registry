@@ -258,6 +258,23 @@ export const getAllRelays = async (options: Options): Promise<Relay[]> => {
   return relays;
 };
 
+const addRelayUrlToRelaysListLock = new Mutex();
+const addRelayUrlToRelaysList = async (options: Options, relayUrl: string) => {
+  const lockId = await addRelayUrlToRelaysListLock.acquire();
+  const release = () => addRelayUrlToRelaysListLock.release(lockId);
+  const relaysPath = getRelaysPath(options);
+  const relaysListPath = path.join(relaysPath, "/relaysList.txt");
+  const relaysListString = await Deno.readTextFile(relaysListPath);
+  const relaysListLines = relaysListString.trim().split("\n");
+  const existingRelayLine = relaysListLines.find((line) => line === relayUrl);
+  if (typeof existingRelayLine !== "undefined") {
+    release();
+    return;
+  }
+  await Deno.writeTextFile(relaysListPath, `${relayUrl}\n`, { append: true });
+  release();
+};
+
 const writeRelayUrlLock = new Mutex();
 export const writeRelayUrl = async (options: Options, relayUrl: string) => {
   const lockId = await writeRelayUrlLock.acquire();
@@ -277,6 +294,7 @@ export const writeRelayUrl = async (options: Options, relayUrl: string) => {
 
   const relayPath = getRelayPath(options, relay.id);
   const relayJson = JSON.stringify(relay);
+  await addRelayUrlToRelaysList(options, relayUrl);
   await Deno.writeTextFile(relayPath, relayJson);
   await gitAddCommitAndPush(options, `Adding relay ${relayUrl}`);
   release();
