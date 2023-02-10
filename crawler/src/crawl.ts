@@ -29,7 +29,7 @@ const crawlRelay = async ({
         })
         .collect();
 
-      logger.debug("#lMer4G Subscribing for kinds", kinds.join(", "));
+      logger.debug("#lMer4G Subscribing for kinds", relayUrl, kinds.join(", "));
 
       if (events.length > 0) {
         const event = events[0] as NostrEvent;
