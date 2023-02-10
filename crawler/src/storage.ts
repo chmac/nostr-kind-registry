@@ -77,10 +77,7 @@ const getType = async (path: string) => {
   }
 };
 
-const assertDataRepoExistsAndCloneIfNotLock = new Mutex();
 const assertDataRepoExistsAndCloneIfNot = async (options: Options) => {
-  const lockId = await assertDataRepoExistsAndCloneIfNotLock.acquire();
-  const release = () => assertDataRepoExistsAndCloneIfNotLock.release(lockId);
   const verbose = options.logger.level <= log.LogLevels.DEBUG;
   const runOpts = {
     cwd: options.dataPath,
@@ -90,7 +87,6 @@ const assertDataRepoExistsAndCloneIfNot = async (options: Options) => {
   const gitPath = path.join(options.dataPath, ".git");
   const gitPathType = await getType(gitPath);
   if (gitPathType === "directory") {
-    release();
     return;
   } else if (gitPathType === "non-existent") {
     await run(["git", "clone", options.dataRepoUrl, "."], runOpts);
@@ -100,11 +96,9 @@ const assertDataRepoExistsAndCloneIfNot = async (options: Options) => {
     await fs.ensureDir(kindsPath);
     const relaysPath = getRelaysPath(options);
     await fs.ensureDir(relaysPath);
-    release();
     return;
   }
 
-  release();
   throw new Error("#uRdgmK dataDir is not git repo");
 };
 
@@ -119,7 +113,7 @@ const doesRepoHaveChanges = async (options: Options) => {
 };
 
 const gitPullLock = new Mutex();
-export const gitPull = async (
+const gitPull = async (
   options: Options,
   ifLastPulledMoreThanSecondsAgo = 300
 ) => {
@@ -196,21 +190,26 @@ export const addKindToKindsList = async (
   release();
 };
 
+const writeKindMetaLock = new Mutex();
 export const writeKindMeta = async (
   options: Options,
   kind: KindMeta
 ): Promise<void> => {
+  const lockId = await writeKindMetaLock.acquire();
+  const release = () => writeKindMetaLock.release(lockId);
   // TODO - Apply a zod schema here
   await gitPull(options, 0);
   const kindMetaPath = getKindPath(options, kind.kind);
   const fileContents = JSON.stringify(kind);
   const existingFileType = await getType(kindMetaPath);
   if (existingFileType !== "non-existent") {
+    release();
     throw new Error("#Gxq5jx Cannot overwrite existing kind");
   }
   await addKindToKindsList(options, kind);
   await Deno.writeTextFile(kindMetaPath, fileContents);
   await gitAddCommitAndPush(options, `Creating kind ${kind.kind}`);
+  release();
 };
 
 export const getKindMeta = async (
