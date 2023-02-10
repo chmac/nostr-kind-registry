@@ -28,6 +28,6 @@ export const saveFoundKind = async ({
   try {
     await writeKindMeta(options, newKindMeta);
   } catch (error) {
-    console.error("#HDufs6 Failed to save new kind", error);
+    console.error("#HDufs6 Failed to save new kind", error, newKindMeta);
   }
 };
