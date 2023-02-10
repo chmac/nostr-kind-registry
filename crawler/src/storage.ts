@@ -87,7 +87,11 @@ const assertDataRepoExistsAndCloneIfNot = async (options: Options) => {
     release();
     return;
   } else if (gitPathType === "non-existent") {
-    await run(["git", "clone", options.dataRepoUrl, "."], runOpts);
+    try {
+      await run(["git", "clone", options.dataRepoUrl, "."], runOpts);
+    } catch (error) {
+      options.logger.error("#jbQTG0 Error during git clone", error);
+    }
     await run("git config --local author.name NKR", runOpts);
     await run("git config --local author.email nkr@dev.null", runOpts);
     const kindsPath = getKindsPath(options);
