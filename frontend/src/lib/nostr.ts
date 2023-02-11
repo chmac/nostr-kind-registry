@@ -2,17 +2,6 @@ import type { NostrEvent } from '../../../shared/types';
 import { relayInit } from 'nostr-tools';
 
 export async function getEventKindFromRelay(kind: number, relayUrl: string): Promise<NostrEvent> {
-	// const sampleEvent: NostrEvent = {
-	// 	id: 'someid',
-	// 	sig: 'somesig',
-	// 	kind: 5,
-	// 	tags: [],
-	// 	pubkey: 'somepubkey',
-	// 	created_at: 12345,
-	// 	content: 'some content'
-	// };
-	// return sampleEvent;
-
 	console.log(`connecting to ${relayUrl} ...`);
 	const relay = relayInit(relayUrl);
 	await relay.connect();
@@ -38,5 +27,11 @@ export async function getEventKindFromRelay(kind: number, relayUrl: string): Pro
 			sub.unsub();
 			reject('event not found');
 		});
+	});
+}
+
+export function getEventKindFromRelays(kind: number, relayUrls: string[]): Promise<NostrEvent>[] {
+	return relayUrls.map((relayUrl) => {
+		return getEventKindFromRelay(kind, relayUrl);
 	});
 }
