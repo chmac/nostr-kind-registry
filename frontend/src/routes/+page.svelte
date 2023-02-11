@@ -3,7 +3,7 @@
 	export let data: PageData;
 
 	function getRandomKind() {
-		const min = 0;
+		const min = 100;
 		const max = 10_000;
 		while (true) {
 			let randomKind = Math.floor(Math.random() * (max - min) + min);
