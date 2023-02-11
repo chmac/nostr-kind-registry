@@ -112,6 +112,11 @@ const command = new cliffy.Command()
   });
 
 try {
+  globalThis.addEventListener("unhandledrejection", (event) => {
+    console.error("#AgJa1w unhandledrejection", event.promise, event.reason);
+    event.preventDefault();
+  });
+
   await command.parse();
 } catch (error) {
   console.error("#UVxW6D Exiting with error now");
