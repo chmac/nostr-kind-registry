@@ -1,4 +1,4 @@
-import type { NostrEvent } from '../../../shared/types';
+import type { NostrEvent } from '../../../../shared/types';
 import { relayInit } from 'nostr-tools';
 
 export async function getEventKindFromRelay(kind: number, relayUrl: string): Promise<NostrEvent> {
@@ -7,6 +7,7 @@ export async function getEventKindFromRelay(kind: number, relayUrl: string): Pro
 	await relay.connect();
 
 	return new Promise((resolve, reject) => {
+		setTimeout(() => reject('timed out'), 5_000);
 		relay.on('connect', () => {
 			console.log(`connected to ${relay.url}`);
 		});

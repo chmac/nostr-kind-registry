@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import type { NostrEvent } from '../../../../../shared/types';
-	import { getEventKindFromRelay } from '../../../lib/nostr';
+	import { getEventKindFromRelay } from '$lib/apis/nostr';
 	export let data: PageData;
 
 	let eventPromise: Promise<NostrEvent> = new Promise(() => {});

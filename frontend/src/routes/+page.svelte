@@ -1,57 +1,42 @@
 <script lang="ts">
-	import { getEventKindFromRelay } from '$lib/nostr';
+	import { getEventKindFromRelay } from '$lib/apis/nostr';
 	import type { NostrEvent } from '../../../shared/types';
 	import type { PageData } from './$types';
+	import { goto } from '$app/navigation';
 	export let data: PageData;
-
-	function getRandomKind() {
-		const min = 100;
-		const max = 10_000;
-		while (true) {
-			let randomKind = Math.floor(Math.random() * (max - min) + min);
-			if (!data.kinds.find(({ kind }) => kind === randomKind)) return randomKind;
-		}
-	}
-
-	let randomKindPromise: Promise<number> = new Promise(() => {});
-
-	function handleGetRandomKindClick() {
-		const randomKind = getRandomKind();
-		randomKindPromise = Promise.resolve(randomKind);
-	}
 </script>
 
-<h1>All Kinds Ever seen</h1>
+<div class="max-w-prose">
+	<h1 class="font-semibold">All Kinds Ever Seen</h1>
+	This page lists every kind our crawlers have ever seen, along with the date of the first sighting.
+	Click on a table row to get more information about that kind.
+</div>
 
-<ul>
-	{#each data.kinds as kind}
-		<li>
-			<a href="/kinds/{kind.kind}">Kind {kind.kind}</a>
-		</li>
-	{/each}
-</ul>
-<p>
-	<a href="" on:click={handleGetRandomKindClick}
-		>get random unseen kind:
-	</a>{#await randomKindPromise then randomKind}
-		{randomKind}
-		<ul>
-			{#each data.relays as relay}
-				<li>
-					{relay}:
-					{#await getEventKindFromRelay(randomKind, relay)}
-						<span>loading…</span>
-					{:then event}
-						<span style="color: red;">oh no! found event {event.id}</span>
-					{:catch error}
-						{#if error === 'event not found'}
-							<span style="color: green;">event not found!</span>
-						{:else}
-							<span style="color: yellow">errored</span>
-						{/if}
-					{/await}
-				</li>
+<div class="my-2 max-w-xl">
+	<table
+		class="table-fixed border-collapse w-full border border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-sm shadow-sm"
+	>
+		<thead>
+			<tr>
+				<th class="border border-slate-300">Kind</th>
+				<th class="border border-slate-300">First Seen</th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each data.kinds.reverse() as kind}
+				<tr on:click={() => goto(`/kinds/${kind.kind}`)} class="hover:bg-slate-300">
+					<td
+						class="border border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400"
+					>
+						{kind.kind}
+					</td>
+					<td
+						class="border border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400"
+					>
+						{kind.seen.toDateString()}
+					</td>
+				</tr>
 			{/each}
-		</ul>
-	{/await}
-</p>
+		</tbody>
+	</table>
+</div>

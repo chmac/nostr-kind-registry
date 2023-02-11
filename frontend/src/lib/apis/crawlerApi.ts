@@ -1,10 +1,12 @@
-import { REPO_PUBLIC_URL } from '../constants';
+import { REPO_PUBLIC_URL } from '../../constants';
 
 export const getSortedKindsList = async () => {
+	console.log('starting fetch');
 	const response = await fetch(`${REPO_PUBLIC_URL}/kinds/kindsList.txt`);
 	if (response.status !== 200) {
 		[];
 	}
+	console.log('got something');
 	const text = await response.text();
 	const kinds = text
 		.trim()
