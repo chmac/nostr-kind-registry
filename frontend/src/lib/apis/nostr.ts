@@ -1,7 +1,10 @@
 import type { NostrEvent } from '../../../../shared/types';
 import { relayInit } from 'nostr-tools';
 
-export async function getEventKindFromRelay(kind: number, relayUrl: string): Promise<NostrEvent> {
+export async function getEventsOfKindFromRelay(
+	kind: number,
+	relayUrl: string
+): Promise<NostrEvent[]> {
 	console.log(`connecting to ${relayUrl} ...`);
 	const relay = relayInit(relayUrl);
 	await relay.connect();
@@ -15,24 +18,36 @@ export async function getEventKindFromRelay(kind: number, relayUrl: string): Pro
 			reject(`failed to connect to ${relay.url}`);
 		});
 		// let's query for an event that exists
-		let sub = relay.sub([
+		const sub = relay.sub([
 			{
-				kinds: [kind]
+				kinds: [kind],
+				limit: 10
 			}
 		]);
+		const events: NostrEvent[] = [];
 
 		sub.on('event', (event: NostrEvent) => {
-			resolve(event);
+			events.push(event);
 		});
 		sub.on('eose', () => {
 			sub.unsub();
-			reject('event not found');
+			if (events.length === 0) {
+				reject('event not found');
+			} else {
+				resolve(events);
+			}
 		});
 	});
 }
 
-export function getEventKindFromRelays(kind: number, relayUrls: string[]): Promise<NostrEvent>[] {
-	return relayUrls.map((relayUrl) => {
-		return getEventKindFromRelay(kind, relayUrl);
+export async function getEventKindFromRelays(
+	kind: number,
+	relayUrls: string[]
+): Promise<NostrEvent[]> {
+	const eventsPromises = relayUrls.flatMap(async (relayUrl) => {
+		return getEventsOfKindFromRelay(kind, relayUrl);
 	});
+	const eventsByRelay = await Promise.all(eventsPromises);
+	const events = eventsByRelay.flatMap((e) => e);
+	return events;
 }

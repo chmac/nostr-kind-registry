@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getEventKindFromRelay } from '$lib/apis/nostr';
+	import { getEventsOfKindFromRelay } from '$lib/apis/nostr';
 	import type { NostrEvent } from '../../../../shared/types';
 	import type { PageData } from './$types';
 	export let data: PageData;
@@ -38,7 +38,7 @@
 		let batchIndex = 0;
 		while (batchIndex < data.relays.length) {
 			for (let i = batchIndex; i < Math.min(batchIndex + batchSize, data.relays.length); i++) {
-				eventPromises[i].eventPromise = getEventKindFromRelay(kind, data.relays[i]);
+				eventPromises[i].eventPromise = getEventsOfKindFromRelay(kind, data.relays[i]);
 			}
 			await Promise.allSettled(
 				eventPromises.slice(batchIndex, batchIndex + batchSize).map((o) => o.eventPromise)
