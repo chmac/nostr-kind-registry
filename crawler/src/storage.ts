@@ -1,10 +1,6 @@
 import { KindMeta, Relay } from "../../shared/types.ts";
 import { fs, log, Mutex, path, run, uuid } from "../deps.ts";
-import {
-  DefaultOptionsWithLogger,
-  GlobalOptions,
-  LoggerOption,
-} from "./options.ts";
+import { GlobalOptions, LoggerOption } from "./options.ts";
 
 type Options = GlobalOptions & LoggerOption;
 
