@@ -1,13 +1,25 @@
 <script lang="ts">
-	import { getEventsOfKindFromRelay } from '$lib/apis/nostr';
+	import { getEventsOfKindFromRelay, getEventsOfKindFromRelays } from '$lib/apis/nostr';
 	import type { NostrEvent } from '../../../../../shared/types';
 	import type { PageData } from './$types';
 	export let data: PageData;
 
 	let eventsPromise: Promise<NostrEvent[]> = new Promise(() => {});
 
-	function handleGetEventClick() {
-		eventsPromise = getEventsOfKindFromRelay(data.kind.kind, data.kind.seenOnRelays?.at(0) ?? '');
+	function handleGetEventClick(event: MouseEvent) {
+		event.preventDefault();
+		const fetchFromRelayUrl = (
+			globalThis.document.getElementById('fetchFromRelayUrl') as HTMLInputElement
+		).value;
+		if (fetchFromRelayUrl.length > 0) {
+			eventsPromise = getEventsOfKindFromRelay(data.kind.kind, fetchFromRelayUrl);
+			return;
+		}
+
+		if (typeof data.kind.seenOnRelays === 'undefined' || data.kind.seenOnRelays.length === 0) {
+			return;
+		}
+		eventsPromise = getEventsOfKindFromRelays(data.kind.kind, data.kind.seenOnRelays);
 	}
 </script>
 
@@ -28,22 +40,32 @@
 			.join('; ') || 'none'}
 	</li>
 	<li>
-		<a href="" on:click={handleGetEventClick}>Fetch example events</a>
+		<p>
+			<button on:click={handleGetEventClick}>Fetch example events</button><input
+				class="ml-1"
+				type="text"
+				id="fetchFromRelayUrl"
+			/>
+		</p>
 		{#await eventsPromise then events}
 			{#each events as event}
+				<hr class="my-4" />
 				<ul>
 					{#each Object.entries(event) as [key, value]}
 						<li class="font-mono break-all">
 							<strong>{key}</strong>:
 							{#if Array.isArray(value)}
-								{JSON.stringify(value)}
+								<ul>
+									{#each value as [tagName, ...tagValue]}
+										<li>{tagName}: {tagValue}</li>
+									{/each}
+								</ul>
 							{:else}
 								{value}
 							{/if}
 						</li>
 					{/each}
 				</ul>
-				<hr class="my-4" />
 			{/each}
 		{:catch error}
 			<p style="color: red">{error}</p>

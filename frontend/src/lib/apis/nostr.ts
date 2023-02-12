@@ -28,6 +28,7 @@ export async function getEventsOfKindFromRelay(
 
 		sub.on('event', (event: NostrEvent) => {
 			events.push(event);
+			console.log(`#LqWeB7 Got event from relay ${relayUrl}`, event);
 		});
 		sub.on('eose', () => {
 			sub.unsub();
@@ -40,7 +41,7 @@ export async function getEventsOfKindFromRelay(
 	});
 }
 
-export async function getEventKindFromRelays(
+export async function getEventsOfKindFromRelays(
 	kind: number,
 	relayUrls: string[]
 ): Promise<NostrEvent[]> {
