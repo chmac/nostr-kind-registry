@@ -1,5 +1,3 @@
-import type { WORKER_OUTPUT_SEEN_KINDS } from '../../../shared/types';
-import { REPO_PUBLIC_URL } from '../constants';
 import { getRelaysList, getSortedKindsList } from '$lib/apis/crawlerApi';
 
 export const load = async () => {
