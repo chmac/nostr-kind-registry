@@ -1,12 +1,12 @@
 import { REPO_PUBLIC_URL } from '../../constants';
 
 export const getSortedKindsList = async () => {
-	console.log('starting fetch');
-	const response = await fetch(`${REPO_PUBLIC_URL}/kinds/kindsList.txt`);
+	console.log('#tuKsxI Starting fetch');
+	const response = await fetch(`${REPO_PUBLIC_URL}/kinds/kindsList.txt`, { cache: 'reload' });
 	if (response.status !== 200) {
 		[];
 	}
-	console.log('got something');
+	console.log('#x7yAAo Fetch finished 200', Array.from(response.headers.entries()));
 	const text = await response.text();
 	const kinds = text
 		.trim()
