@@ -29,12 +29,21 @@
 	</li>
 	<li>
 		<a href="" on:click={handleGetEventClick}>get event details</a>
-		<pre>
-			{#await eventPromise then event}
-				{JSON.stringify(event, null, 2)}
-			{:catch error}
-				<span style="color: red">{error}</span>
-			{/await}
-		</pre>
+		{#await eventPromise then event}
+			<ul>
+				{#each Object.entries(event) as [key, value]}
+					<li class="font-mono break-all">
+						<strong>{key}</strong>:
+						{#if Array.isArray(value)}
+							{JSON.stringify(value)}
+						{:else}
+							{value}
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		{:catch error}
+			<p style="color: red">{error}</p>
+		{/await}
 	</li>
 </ul>
