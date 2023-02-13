@@ -8,11 +8,11 @@
 		getKindFromRelayPromises(data.randomKind, 10);
 	}
 
-	const eventPromises: { relay: string; eventPromise: Promise<NostrEvent> }[] = data.relays.map(
+	const eventPromises: { relay: string; eventPromise: Promise<NostrEvent[]> }[] = data.relays.map(
 		(r) => {
 			return {
 				relay: r,
-				eventPromise: Promise.reject('not checked yet') as Promise<NostrEvent>
+				eventPromise: Promise.reject('not checked yet') as Promise<NostrEvent[]>
 			};
 		}
 	);
@@ -32,13 +32,13 @@
 </script>
 
 <div class="max-w-prose">
-	<p>
+	<p class="mb-5">
 		Your random kind: {data.randomKind}
 	</p>
 	<button
-		class="bg-slate-200 hover:bg-slate-300 rounded border"
+		class="bg-slate-200 hover:bg-slate-300 rounded border p-2"
 		on:click={handleCheckRandomKindClick}
-		><span class="p-5">Check It Now!</span>
+		>Check It Now!
 	</button>
 	<div class="mt-5">
 		<table>
@@ -65,7 +65,7 @@
 								{:else if error === 'timed out'}
 									<span style="color: orange">timed out</span>
 								{:else}
-									<span style="color: yellow">errored</span>
+									<span style="color: orange">errored</span>
 								{/if}
 							{/await}
 						</td>
