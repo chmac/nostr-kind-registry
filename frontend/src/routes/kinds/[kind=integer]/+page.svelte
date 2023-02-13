@@ -3,7 +3,14 @@
 	import InteractiveNostrEvent from '$lib/components/InteractiveNostrEvent.svelte';
 	import type { NostrEvent } from '../../../../../shared/types';
 	import type { PageData } from './$types';
+	import { COMMENT_KIND, COMMENT_RELAYS } from '../../../constants';
+	import { comment } from 'postcss';
 	export let data: PageData;
+
+	let eventDialog: HTMLDialogElement;
+	let urlForm: HTMLFormElement;
+	let commentUrl: string;
+	let commentEventStub: string;
 
 	let eventsPromise: Promise<NostrEvent[]> = new Promise(() => {});
 
@@ -21,6 +28,19 @@
 			return;
 		}
 		eventsPromise = getEventsOfKindFromRelays(data.kind.kind, data.kind.seenOnRelays);
+	}
+
+	function handleUrlFormClick(event: MouseEvent) {
+		event.preventDefault();
+		commentEventStub = `{
+  "kind": "${COMMENT_KIND}",
+  "tags": [
+    ["k", "${data.kind.kind}"],
+	["url", "${commentUrl}""]
+  ],
+  "content": ""
+}`;
+		eventDialog.show();
 	}
 </script>
 
@@ -41,6 +61,13 @@
 			.join('; ') || 'none'}
 	</li>
 	<li>
+		<form bind:this={urlForm}>
+			<button
+				class="bg-slate-200 hover:bg-slate-300 rounded border p-2 mb-2"
+				on:click={(e) => urlForm.checkValidity() && handleUrlFormClick(e)}>Add URL comment</button
+			>
+			<input class="border ml-1" type="URL" required bind:value={commentUrl} />
+		</form>
 		<p>
 			<button
 				class="bg-slate-200 hover:bg-slate-300 rounded border p-2 mb-2"
@@ -57,3 +84,25 @@
 		{/await}
 	</li>
 </ul>
+
+<!-- A modal dialog containing a form -->
+<dialog bind:this={eventDialog} class="border bg-slate-100">
+	<p>
+		To add an implementation url, publish an event with these fields to one (or all) of these
+		relays:<br />{COMMENT_RELAYS.join(', ')}
+	</p>
+	<pre class="border my-3 p-2">{commentEventStub}</pre>
+	<form method="dialog">
+		<button
+			class="bg-slate-200 hover:bg-slate-300 rounded border p-2 mb-2 float-left"
+			on:click={(e) => {
+				e.preventDefault();
+				navigator.clipboard.writeText(commentEventStub);
+			}}>Copy</button
+		>
+		<button
+			class="bg-slate-200 hover:bg-slate-300 rounded border p-2 mb-2 float-right"
+			on:click={() => eventDialog.close()}>Close</button
+		>
+	</form>
+</dialog>

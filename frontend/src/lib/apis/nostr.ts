@@ -10,7 +10,6 @@ export async function getEventsOfKindFromRelay(
 	await relay.connect();
 
 	return new Promise((resolve, reject) => {
-		setTimeout(() => reject('timed out'), 5_000);
 		relay.on('connect', () => {
 			console.log(`connected to ${relay.url}`);
 		});
@@ -38,6 +37,10 @@ export async function getEventsOfKindFromRelay(
 				resolve(events);
 			}
 		});
+		setTimeout(() => {
+			reject('timed out');
+			sub.unsub();
+		}, 5_000);
 	});
 }
 
