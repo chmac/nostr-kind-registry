@@ -22,7 +22,10 @@
 		</thead>
 		<tbody>
 			{#each data.kinds.reverse() as kind}
-				<tr on:click={() => goto(`/kinds/${kind.kind}`)} class="hover:bg-slate-300">
+				<tr
+					on:click={() => goto(`/kinds/${kind.kind}`)}
+					class="hover:bg-slate-300 hover:cursor-pointer"
+				>
 					<td
 						class="border border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400"
 					>
