@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getEventsOfKindFromRelay, getEventsOfKindFromRelays } from '$lib/apis/nostr';
+	import InteractiveNostrEvent from '$lib/components/InteractiveNostrEvent.svelte';
 	import type { NostrEvent } from '../../../../../shared/types';
 	import type { PageData } from './$types';
 	export let data: PageData;
@@ -41,31 +42,15 @@
 	</li>
 	<li>
 		<p>
-			<button on:click={handleGetEventClick}>Fetch example events</button><input
-				class="ml-1"
-				type="text"
-				id="fetchFromRelayUrl"
-			/>
+			<button
+				class="bg-slate-200 hover:bg-slate-300 rounded border p-2"
+				on:click={handleGetEventClick}>Fetch example events</button
+			><input class="ml-1" type="text" id="fetchFromRelayUrl" />
 		</p>
 		{#await eventsPromise then events}
 			{#each events as event}
 				<hr class="my-4" />
-				<ul>
-					{#each Object.entries(event) as [key, value]}
-						<li class="font-mono break-all">
-							<strong>{key}</strong>:
-							{#if Array.isArray(value)}
-								<ul>
-									{#each value as [tagName, ...tagValue]}
-										<li>{tagName}: {tagValue}</li>
-									{/each}
-								</ul>
-							{:else}
-								{value}
-							{/if}
-						</li>
-					{/each}
-				</ul>
+				<InteractiveNostrEvent {event} />
 			{/each}
 		{:catch error}
 			<p style="color: red">{error}</p>
