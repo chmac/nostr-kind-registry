@@ -43,7 +43,7 @@
 	<li>
 		<p>
 			<button
-				class="bg-slate-200 hover:bg-slate-300 rounded border p-2"
+				class="bg-slate-200 hover:bg-slate-300 rounded border p-2 mb-2"
 				on:click={handleGetEventClick}>Fetch example events</button
 			><input class="ml-1" type="text" id="fetchFromRelayUrl" />
 		</p>
