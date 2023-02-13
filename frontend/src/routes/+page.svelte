@@ -9,11 +9,9 @@
 		switch (col) {
 			case 'kind':
 				kinds = kinds.sort((a, b) => a.kind - b.kind);
-				console.log('kind', kinds);
 				break;
 			case 'seen':
 				kinds = kinds.sort((a, b) => a.seen.valueOf() - b.seen.valueOf());
-				console.log('seen', kinds);
 				break;
 		}
 	}
