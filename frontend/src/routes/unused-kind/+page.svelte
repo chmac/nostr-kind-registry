@@ -5,7 +5,8 @@
 	export let data: PageData;
 
 	function handleCheckRandomKindClick() {
-		getKindFromRelayPromises(data.randomKind, 10);
+		// getKindFromRelayPromises(data.randomKind, 10);
+		batchCheck(data.randomKind, 8);
 	}
 
 	const eventPromises: { relay: string; eventPromise: Promise<NostrEvent[]> }[] = data.relays.map(
@@ -17,17 +18,20 @@
 		}
 	);
 
-	async function getKindFromRelayPromises(kind: number, batchSize: number) {
-		let batchIndex = 0;
-		while (batchIndex < data.relays.length) {
-			for (let i = batchIndex; i < Math.min(batchIndex + batchSize, data.relays.length); i++) {
-				eventPromises[i].eventPromise = getEventsOfKindFromRelay(kind, data.relays[i]);
-			}
-			await Promise.allSettled(
-				eventPromises.slice(batchIndex, batchIndex + batchSize).map((o) => o.eventPromise)
-			);
-			batchIndex += batchSize;
+	async function batchCheck(kind: number, batchSize: number) {
+		const relays = data.relays;
+		let index = 0;
+
+		if (batchSize > relays.length) batchSize = relays.length;
+
+		function checkNextRelay() {
+			index++;
+			if (index >= relays.length) return;
+			eventPromises[index].eventPromise = getEventsOfKindFromRelay(kind, data.relays[index]);
+			eventPromises[index].eventPromise.finally(() => checkNextRelay());
 		}
+
+		for (let i = 0; i < batchSize; i++) checkNextRelay();
 	}
 </script>
 
