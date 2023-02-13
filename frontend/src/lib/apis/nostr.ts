@@ -59,10 +59,10 @@ export async function getEventsOfKindFromRelays(
 
 export async function getCommentUrls(relayUrls: string[], kind: number) {
 	// TODO: actually filter for the kind
-	const events = getEventsOfKindFromRelays(COMMENT_KIND, relayUrls);
+	const events = await getEventsOfKindFromRelays(COMMENT_KIND, relayUrls);
 	const urls: string[] = [];
 
-	(await events).forEach((e: NostrEvent) => {
+	events.forEach((e: NostrEvent) => {
 		let uTag = e.tags.find((tagArray) => {
 			return tagArray.at(0) === 'url';
 		});
