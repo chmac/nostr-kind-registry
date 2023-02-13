@@ -25,10 +25,10 @@
 		if (batchSize > relays.length) batchSize = relays.length;
 
 		function checkNextRelay() {
-			index++;
 			if (index >= relays.length) return;
 			eventPromises[index].eventPromise = getEventsOfKindFromRelay(kind, data.relays[index]);
 			eventPromises[index].eventPromise.finally(() => checkNextRelay());
+			index++;
 		}
 
 		for (let i = 0; i < batchSize; i++) checkNextRelay();
