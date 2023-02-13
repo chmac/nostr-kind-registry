@@ -27,12 +27,12 @@
 					class="hover:bg-slate-300 hover:cursor-pointer"
 				>
 					<td
-						class="border border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400"
+						class="border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-1"
 					>
 						{kind.kind}
 					</td>
 					<td
-						class="border border-slate-300 dark:border-slate-700 p-4 text-slate-500 dark:text-slate-400"
+						class="border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-1"
 					>
 						{kind.seen.toDateString()}
 					</td>
