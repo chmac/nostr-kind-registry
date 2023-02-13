@@ -2,6 +2,21 @@
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 	export let data: PageData;
+
+	let kinds = data.kinds;
+
+	function sort(col: 'seen' | 'kind') {
+		switch (col) {
+			case 'kind':
+				kinds = kinds.sort((a, b) => a.kind - b.kind);
+				console.log('kind', kinds);
+				break;
+			case 'seen':
+				kinds = kinds.sort((a, b) => a.seen.valueOf() - b.seen.valueOf());
+				console.log('seen', kinds);
+				break;
+		}
+	}
 </script>
 
 <div class="max-w-prose">
@@ -16,15 +31,21 @@
 	>
 		<thead>
 			<tr>
-				<th class="border border-slate-300">Kind</th>
-				<th class="border border-slate-300">First Seen</th>
+				<th
+					class="border border-slate-300 hover:bg-slate-200 hover:cursor-pointer"
+					on:click={() => sort('kind')}>Kind</th
+				>
+				<th
+					class="border border-slate-300 hover:bg-slate-200 hover:cursor-pointer"
+					on:click={() => sort('seen')}>First Seen</th
+				>
 			</tr>
 		</thead>
 		<tbody>
-			{#each data.kinds.reverse() as kind}
+			{#each kinds as kind (kind.kind)}
 				<tr
 					on:click={() => goto(`/kinds/${kind.kind}`)}
-					class="hover:bg-slate-300 hover:cursor-pointer"
+					class="hover:bg-slate-200 hover:cursor-pointer"
 				>
 					<td
 						class="border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 p-1"
