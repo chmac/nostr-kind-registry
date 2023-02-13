@@ -7,7 +7,7 @@
 <ul>
 	<li class="font-mono break-all">
 		<details open={event.tags.length < maxLengthInChars}>
-			<summary><strong>tags</strong>:</summary>
+			<summary class="hover:cursor-pointer"><strong>tags</strong>:</summary>
 			{#if Array.isArray(event.tags)}
 				<ul>
 					{#each event.tags as [tagName, ...tagValue]}
@@ -21,7 +21,7 @@
 	</li>
 	<li class="font-mono break-all">
 		<details open={event.content.length < maxLengthInChars}>
-			<summary>
+			<summary class="hover:cursor-pointer">
 				<strong>content</strong>:
 			</summary>
 			{event.content}
@@ -29,7 +29,7 @@
 	</li>
 	<li class="font-mono break-all">
 		<details open>
-			<summary>
+			<summary class="hover:cursor-pointer">
 				<strong>created_at</strong>:
 			</summary>
 			{event.created_at}
@@ -38,7 +38,7 @@
 	</li>
 	<li class="font-mono break-all">
 		<details open>
-			<summary>
+			<summary class="hover:cursor-pointer">
 				<strong>pubkey</strong>:
 			</summary>
 			<a
@@ -51,7 +51,7 @@
 	</li>
 	<li class="font-mono break-all">
 		<details>
-			<summary>
+			<summary class="hover:cursor-pointer">
 				<strong>kind</strong>:
 			</summary>
 			{event.kind}
@@ -59,7 +59,7 @@
 	</li>
 	<li class="font-mono break-all">
 		<details>
-			<summary>
+			<summary class="hover:cursor-pointer">
 				<strong>id</strong>:
 			</summary>
 			{event.id}
@@ -67,7 +67,7 @@
 	</li>
 	<li class="font-mono break-all">
 		<details>
-			<summary>
+			<summary class="hover:cursor-pointer">
 				<strong>sig</strong>:
 			</summary>
 			{event.sig}
