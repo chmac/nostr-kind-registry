@@ -16,7 +16,7 @@
 	}
 </script>
 
-<ul>
+<ul class="max-w-prose">
 	<li class="font-mono break-all">
 		<details open={event.tags.length < maxLengthInChars}>
 			<summary class="hover:cursor-pointer"><strong>tags</strong>:</summary>
