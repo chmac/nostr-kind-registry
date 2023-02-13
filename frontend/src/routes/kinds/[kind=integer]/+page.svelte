@@ -33,10 +33,10 @@
 	function handleUrlFormClick(event: MouseEvent) {
 		event.preventDefault();
 		commentEventStub = `{
-  "kind": "${COMMENT_KIND}",
+  "kind": ${COMMENT_KIND},
   "tags": [
     ["k", "${data.kind.kind}"],
-	["url", "${commentUrl}""]
+	["url", "${commentUrl}"]
   ],
   "content": ""
 }`;
@@ -56,9 +56,8 @@
 			.join('; ') || 'none'}
 	</li>
 	<li>
-		Related Implementations: {@html data.kind.implementationUrls
-			?.map((i) => `<a href="${i}">${i}</a>`)
-			.join('; ') || 'none'}
+		Related Implementations: {@html data.urls?.map((i) => `<a href="${i}">${i}</a>`).join('; ') ||
+			'none'}
 	</li>
 	<li>
 		<form bind:this={urlForm}>

@@ -1,5 +1,6 @@
 import type { NostrEvent } from '../../../../shared/types';
 import { relayInit } from 'nostr-tools';
+import { COMMENT_KIND } from '../../constants';
 
 export async function getEventsOfKindFromRelay(
 	kind: number,
@@ -54,4 +55,18 @@ export async function getEventsOfKindFromRelays(
 	const eventsByRelay = await Promise.all(eventsPromises);
 	const events = eventsByRelay.flatMap((e) => e);
 	return events;
+}
+
+export async function getCommentUrls(relayUrls: string[], kind: number) {
+	// TODO: actually filter for the kind
+	const events = getEventsOfKindFromRelays(COMMENT_KIND, relayUrls);
+	const urls: string[] = [];
+
+	(await events).forEach((e: NostrEvent) => {
+		let uTag = e.tags.find((tagArray) => {
+			return tagArray.at(0) === 'url';
+		});
+		if (uTag !== undefined && uTag.length >= 2) urls.push(uTag[1]);
+	});
+	return urls;
 }
