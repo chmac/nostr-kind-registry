@@ -1,7 +1,19 @@
 <script lang="ts">
 	import type { NostrEvent } from '../../../../shared/types';
 	export let event: NostrEvent;
-	export let maxLengthInChars = 100;
+	export let maxLengthInChars = 500;
+
+	function isJSON(s: string) {
+		console.log('checking', s);
+		try {
+			JSON.parse(s);
+			console.log('success');
+			return true;
+		} catch (e) {
+			console.log('failure');
+			return false;
+		}
+	}
 </script>
 
 <ul>
@@ -24,7 +36,11 @@
 			<summary class="hover:cursor-pointer">
 				<strong>content</strong>:
 			</summary>
-			{event.content}
+			{#if isJSON(event.content)}
+				<pre>{JSON.stringify(JSON.parse(event.content), null, 2)}</pre>
+			{:else}
+				<pre>{event.content}</pre>
+			{/if}
 		</details>
 	</li>
 	<li class="font-mono break-all">
