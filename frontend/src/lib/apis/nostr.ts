@@ -2,10 +2,7 @@ import type { NostrEvent } from '../../../../shared/types';
 import { relayInit } from 'nostr-tools';
 import { COMMENT_KIND } from '../../constants';
 
-export async function getEventsOfKindFromRelay(
-	kind: number,
-	relayUrl: string
-): Promise<NostrEvent[]> {
+export async function getEventsFromRelay(relayUrl: string, filter: any): Promise<NostrEvent[]> {
 	console.log(`connecting to ${relayUrl} ...`);
 	const relay = relayInit(relayUrl);
 	await relay.connect();
@@ -18,12 +15,7 @@ export async function getEventsOfKindFromRelay(
 			reject(`failed to connect to ${relay.url}`);
 		});
 		// let's query for an event that exists
-		const sub = relay.sub([
-			{
-				kinds: [kind],
-				limit: 10
-			}
-		]);
+		const sub = relay.sub([filter]);
 		const events: NostrEvent[] = [];
 
 		sub.on('event', (event: NostrEvent) => {
@@ -45,6 +37,10 @@ export async function getEventsOfKindFromRelay(
 	});
 }
 
+export function getEventsOfKindFromRelay(kind: number, relayUrl: string): Promise<NostrEvent[]> {
+	return getEventsFromRelay(relayUrl, { kinds: [kind] });
+}
+
 export async function getEventsOfKindFromRelays(
 	kind: number,
 	relayUrls: string[]
@@ -59,14 +55,21 @@ export async function getEventsOfKindFromRelays(
 
 export async function getCommentUrls(relayUrls: string[], kind: number) {
 	// TODO: actually filter for the kind
-	const events = await getEventsOfKindFromRelays(COMMENT_KIND, relayUrls);
-	const urls: string[] = [];
-
-	events.forEach((e: NostrEvent) => {
-		let uTag = e.tags.find((tagArray) => {
-			return tagArray.at(0) === 'url';
+	try {
+		const events = await getEventsFromRelay(relayUrls[0], {
+			limit: 20,
+			'#k': [`${kind}`]
 		});
-		if (uTag !== undefined && uTag.length >= 2) urls.push(uTag[1]);
-	});
-	return urls;
+		const urls: string[] = [];
+
+		events.forEach((e: NostrEvent) => {
+			let uTag = e.tags.find((tagArray) => {
+				return tagArray.at(0) === 'url';
+			});
+			if (uTag !== undefined && uTag.length >= 2) urls.push(uTag[1]);
+		});
+		return urls;
+	} catch (e) {
+		return [];
+	}
 }
