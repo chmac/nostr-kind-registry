@@ -56,7 +56,7 @@
 			.join('; ') || 'none'}
 	</li>
 	<li>
-		Related Implementations: {@html data.urls?.map((i) => `<a href="${i}">${i}</a>`).join('; ') ||
+		Related Implementations: {@html data.urls.map((i) => `<a href="${i}">${i}</a>`).join('; ') ||
 			'none'}
 	</li>
 	<li>

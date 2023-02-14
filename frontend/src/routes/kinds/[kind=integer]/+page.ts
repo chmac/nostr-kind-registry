@@ -8,6 +8,6 @@ export const load = async ({ params }: { params: { kind: string } }) => {
 	console.log('#HLVitq jsonString', jsonString);
 	const json = JSON.parse(jsonString) as KindMeta;
 
-	const urls = getCommentUrls(COMMENT_RELAYS, parseInt(params.kind));
+	const urls = await getCommentUrls(COMMENT_RELAYS, parseInt(params.kind));
 	return { kind: json, urls };
 };
