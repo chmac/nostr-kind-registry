@@ -4,7 +4,6 @@
 	import type { NostrEvent } from '../../../../../shared/types';
 	import type { PageData } from './$types';
 	import { COMMENT_KIND, COMMENT_RELAYS } from '../../../constants';
-	import { comment } from 'postcss';
 	export let data: PageData;
 
 	let eventDialog: HTMLDialogElement;

@@ -1,5 +1,6 @@
 import type { NostrEvent } from '../../../../shared/types';
-import { relayInit } from 'nostr-tools';
+import * as nostr from 'nostr-tools';
+const { relayInit } = nostr; // had some issue with import { relayInit } from 'nostr-tools'
 import { COMMENT_KIND } from '../../constants';
 
 export async function getEventsFromRelay(relayUrl: string, filter: any): Promise<NostrEvent[]> {
@@ -57,6 +58,7 @@ export async function getCommentUrls(relayUrls: string[], kind: number) {
 	// TODO: actually filter for the kind
 	try {
 		const events = await getEventsFromRelay(relayUrls[0], {
+			kinds: [COMMENT_KIND],
 			limit: 20,
 			'#k': [`${kind}`]
 		});
