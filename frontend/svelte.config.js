@@ -1,7 +1,10 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/kit/vite';
+import { getKindsPaths } from './utils/getKindsPaths.js';
 
 const isDev = process.argv.includes('dev');
+
+const kindPaths = await getKindsPaths();
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -18,8 +21,7 @@ const config = {
 		}),
 		prerender: {
 			crawl: true,
-			entries: ['/', '/kinds/0/', '/kinds/1/', '/kinds/2/']
-			// entries: ['/']
+			entries: ['/'].concat(kindPaths)
 		}
 	}
 };
