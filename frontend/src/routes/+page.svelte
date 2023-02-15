@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import type { PageData } from './$types';
 	export let data: PageData;
 
@@ -42,7 +43,7 @@
 		<tbody>
 			{#each kinds as kind (kind.kind)}
 				<tr
-					on:click={() => goto(`/kinds/${kind.kind}`)}
+					on:click={() => goto(`${base}/kinds/${kind.kind}`)}
 					class="hover:bg-slate-200 hover:cursor-pointer"
 				>
 					<td
