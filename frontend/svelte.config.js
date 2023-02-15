@@ -14,9 +14,13 @@ const config = {
 			base: isDev ? '' : '/nostr-kind-registry'
 		},
 		adapter: adapter({
-			fallback: 'index.html',
+			fallback: '404.html'
 		}),
-		prerender: { entries: [] }
+		prerender: {
+			crawl: true,
+			entries: ['/', '/kinds/0', '/kinds/1', '/kinds/2']
+			// entries: ['/']
+		}
 	}
 };
 
