@@ -12,8 +12,9 @@
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write .",
 		"deploy:set-domain": "echo kinds.nostring.stream > ./build/CNAME",
-		"deploy:publish": "gh-pages -d build",
-		"deploy": "yarn build && yarn deploy:set-domain && yarn deploy:publish"
+		"deploy:set-nojekyll": "touch ./build/.nojekyll",
+		"deploy:publish": "gh-pages -t -d build",
+		"deploy": "yarn build && yarn deploy:set-domain && yarn deploy:set-nojekyll && yarn deploy:publish"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
