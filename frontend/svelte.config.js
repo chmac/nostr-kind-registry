@@ -14,7 +14,7 @@ const config = {
 
 	kit: {
 		paths: {
-			base: isDev ? '' : '/nostr-kind-registry'
+			// base: isDev ? '' : '/nostr-kind-registry'
 		},
 		adapter: adapter({
 			fallback: '404.html'
