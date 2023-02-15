@@ -1,0 +1,1 @@
+import{g as a,a as o}from"./crawlerApi-a3edcecd.js";const s=async()=>{const t=await a(),e=await o();return{kinds:t,relays:e}},n=Object.freeze(Object.defineProperty({__proto__:null,load:s},Symbol.toStringTag,{value:"Module"}));export{n as _,s as l};
