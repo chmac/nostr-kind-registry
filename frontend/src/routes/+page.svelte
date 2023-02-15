@@ -12,7 +12,7 @@
 				kinds = kinds.sort((a, b) => a.kind - b.kind);
 				break;
 			case 'seen':
-				kinds = kinds.sort((a, b) => a.seen.valueOf() - b.seen.valueOf());
+				kinds = kinds.sort((a, b) => b.seen.valueOf() - a.seen.valueOf());
 				break;
 		}
 	}

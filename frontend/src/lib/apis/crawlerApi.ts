@@ -17,7 +17,7 @@ export const getSortedKindsList = async () => {
 			const seen = new Date(dateString);
 			return { kind, seen };
 		});
-	const sortedKinds = kinds.sort((a, b) => a.seen.getTime() - b.seen.getTime());
+	const sortedKinds = kinds.sort((a, b) => b.seen.getTime() - a.seen.getTime());
 	return sortedKinds;
 };
 
