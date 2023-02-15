@@ -18,7 +18,7 @@ const config = {
 		}),
 		prerender: {
 			crawl: true,
-			entries: ['/', '/kinds/0', '/kinds/1', '/kinds/2']
+			entries: ['/', '/kinds/0/', '/kinds/1/', '/kinds/2/']
 			// entries: ['/']
 		}
 	}
