@@ -4,13 +4,13 @@
 	export let maxLengthInChars = 500;
 
 	function isJSON(s: string) {
-		console.log('checking', s);
+		console.log('#DPEAu0 checking', s);
 		try {
 			JSON.parse(s);
-			console.log('success');
+			console.log('#36HhGS success');
 			return true;
 		} catch (e) {
-			console.log('failure');
+			console.log('#3y1eft failure');
 			return false;
 		}
 	}

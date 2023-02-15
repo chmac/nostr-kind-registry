@@ -4,13 +4,13 @@ const { relayInit } = nostr; // had some issue with import { relayInit } from 'n
 import { COMMENT_KIND } from '../../constants';
 
 export async function getEventsFromRelay(relayUrl: string, filter: any): Promise<NostrEvent[]> {
-	console.log(`connecting to ${relayUrl} ...`);
+	console.log(`#5EULu9 connecting to ${relayUrl} ...`);
 	const relay = relayInit(relayUrl);
 	await relay.connect();
 
 	return new Promise((resolve, reject) => {
 		relay.on('connect', () => {
-			console.log(`connected to ${relay.url}`);
+			console.log(`#sITVfy connected to ${relay.url}`);
 		});
 		relay.on('error', () => {
 			reject(`failed to connect to ${relay.url}`);
