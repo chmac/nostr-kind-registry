@@ -1,7 +1,7 @@
 import { getRelaysList, getSortedKindsList } from '$lib/apis/crawlerApi';
 
 function getRandomKind(seenKinds: number[]) {
-	const min = 100;
+	const min = 1000;
 	const max = 10_000;
 	// eslint-disable-next-line no-constant-condition
 	while (true) {
