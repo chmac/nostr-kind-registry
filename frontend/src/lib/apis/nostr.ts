@@ -45,6 +45,10 @@ export function getEventsOfKindFromRelay(kind: number, relayUrl: string): Promis
 	return getEventsFromRelay(relayUrl, { kinds: [kind] });
 }
 
+export function checkRelayForEventsOfKind(kind: number, relayUrl: string): Promise<NostrEvent[]> {
+	return getEventsFromRelay(relayUrl, { kinds: [kind], limit: 1 });
+}
+
 export async function getEventsOfKindFromRelays(
 	kind: number,
 	relayUrls: string[]

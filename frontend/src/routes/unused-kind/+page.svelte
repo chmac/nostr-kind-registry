@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getEventsOfKindFromRelay } from '$lib/apis/nostr';
+	import { checkRelayForEventsOfKind, getEventsOfKindFromRelay } from '$lib/apis/nostr';
 	import type { NostrEvent } from '../../../../shared/types';
 	import type { PageData } from './$types';
 	export let data: PageData;
@@ -30,7 +30,7 @@
 
 		function checkNextRelay() {
 			if (index >= relays.length) return;
-			eventPromises[index].eventPromise = getEventsOfKindFromRelay(kind, data.relays[index]);
+			eventPromises[index].eventPromise = checkRelayForEventsOfKind(kind, data.relays[index]);
 			eventPromises[index].eventPromise.finally(() => checkNextRelay());
 			index++;
 		}
