@@ -13,6 +13,7 @@ export async function getEventsFromRelay(relayUrl: string, filter: any): Promise
 			console.log(`#sITVfy connected to ${relay.url}`);
 		});
 		relay.on('error', () => {
+			relay.close();
 			reject(`failed to connect to ${relay.url}`);
 		});
 		// let's query for an event that exists
@@ -25,6 +26,7 @@ export async function getEventsFromRelay(relayUrl: string, filter: any): Promise
 		});
 		sub.on('eose', () => {
 			sub.unsub();
+			relay.close();
 			if (events.length === 0) {
 				reject('event not found');
 			} else {
@@ -34,6 +36,7 @@ export async function getEventsFromRelay(relayUrl: string, filter: any): Promise
 		setTimeout(() => {
 			reject('timed out');
 			sub.unsub();
+			relay.close();
 		}, 5_000);
 	});
 }
