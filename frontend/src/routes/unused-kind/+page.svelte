@@ -3,10 +3,14 @@
 	import type { NostrEvent } from '../../../../shared/types';
 	import type { PageData } from './$types';
 	export let data: PageData;
+	let selectedKind: number;
 
 	function handleCheckRandomKindClick() {
-		// getKindFromRelayPromises(data.randomKind, 10);
-		batchCheck(data.randomKind, 8);
+		if (typeof selectedKind !== 'undefined') {
+			batchCheck(selectedKind, 8);
+		} else {
+			batchCheck(data.randomKind, 8);
+		}
 	}
 
 	const eventPromises: { relay: string; eventPromise: Promise<NostrEvent[]> }[] = data.relays.map(
@@ -37,7 +41,7 @@
 
 <div class="max-w-prose">
 	<p class="mb-5">
-		Your random kind: {data.randomKind}
+		Your random kind: {data.randomKind} <input type="number" bind:value={selectedKind} />
 	</p>
 	<button
 		class="bg-slate-200 hover:bg-slate-300 rounded border p-2"
