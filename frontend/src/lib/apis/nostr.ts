@@ -20,11 +20,20 @@ export async function getEventsFromRelay(relayUrl: string, filter: any): Promise
 		const sub = relay.sub([filter]);
 		const events: NostrEvent[] = [];
 
+		const timeoutTimerId = setTimeout(() => {
+			console.log(`#IvEtOq getEventsFromRelay timeout ${relayUrl}`);
+			reject('timed out');
+			sub.unsub();
+			relay.close();
+		}, 5_000);
+
 		sub.on('event', (event: NostrEvent) => {
 			events.push(event);
 			console.log(`#LqWeB7 Got event from relay ${relayUrl}`, event);
 		});
 		sub.on('eose', () => {
+			console.log(`#1ykpIS Closing relay connection ${relayUrl}`);
+			clearTimeout(timeoutTimerId);
 			sub.unsub();
 			relay.close();
 			if (events.length === 0) {
@@ -33,11 +42,6 @@ export async function getEventsFromRelay(relayUrl: string, filter: any): Promise
 				resolve(events);
 			}
 		});
-		setTimeout(() => {
-			reject('timed out');
-			sub.unsub();
-			relay.close();
-		}, 5_000);
 	});
 }
 
