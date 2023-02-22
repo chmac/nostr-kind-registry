@@ -1,4 +1,4 @@
-import { fetch } from 'node-fetch';
+import fetch from 'node-fetch';
 import { REPO_PUBLIC_URL } from '../src/constants.js';
 
 // NOTE: As this file is loaded from `svelte.config.js` it cannot use
