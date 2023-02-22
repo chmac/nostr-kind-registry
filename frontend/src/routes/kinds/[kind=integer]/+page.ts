@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import { getCommentUrls } from '$lib/apis/nostr';
 import type { KindMeta } from '../../../../../shared/types';
 import { COMMENT_RELAYS, REPO_PUBLIC_URL } from '../../../constants';
@@ -8,6 +9,8 @@ export const load = async ({ params }: { params: { kind: string } }) => {
 	console.log('#HLVitq jsonString', jsonString);
 	const json = JSON.parse(jsonString) as KindMeta;
 
-	const urls = await getCommentUrls(COMMENT_RELAYS, parseInt(params.kind));
+	// We fetch data on the client, but not on the server, because this data is
+	// published by users on nostr and so we don't trust it at all.
+	const urls = browser ? await getCommentUrls(COMMENT_RELAYS, parseInt(params.kind)) : [];
 	return { kind: json, urls };
 };
